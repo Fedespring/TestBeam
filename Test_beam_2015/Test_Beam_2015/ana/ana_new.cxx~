@@ -1,0 +1,330 @@
+{
+
+#include <iostream>     // std::cout
+#include <fstream>      // std::fstream
+#include "TFile.h"
+#include "TSystem.h"
+#include "TMacro.h"
+#include <ctime>
+#include <cstdlib>
+
+
+  ifstream in,ifile;
+  
+  Int_t run, track,c,np,i,ie; 
+  Float_t xs,ys,zs;
+  Float_t xe,ye,ze,te;
+  Float_t xend,yend,zend,tend;
+  Float_t xiend,yiend,ziend,tiend;
+  Float_t statuse,statusi;
+  Double_t xmean,ymean;
+  Int_t nlines;
+  Int_t k,l;
+  Int_t m=-3;
+  
+  char data[30];
+  //char name[35] = "100M";
+  //char name[35] = "strip_RWELL_80MOhm_0T_H4_2014";
+  //char name[35] = "strip_RWELL_80MOhm_05T_H4_2014";
+  //char name[35] = "strip_RWELL_80MOhm_1T_H4_2014";
+
+  //  char name[35] = "strip_RWELL_80MOhm_0T_ARCO2";
+  char name[35] = "strip_RWELL_80MOhm_05T_ARCO2";
+  //char name[35] = "strip_RWELL_80MOhm_1T_ARCO2";
+
+  char dat[10]=".dat";
+  sprintf(data, "%s%s%s", name, dat);
+
+  char rootupla[30];
+  char root[10]=".root";
+  sprintf(rootupla, "%s%s", name, root);
+  
+  Int_t random_integer, k;
+  Double_t random_float;
+  Double_t range;
+  //nplots produce i plots per diverse strip width
+  //#define nplots 21;
+#define nplots 21;
+  Double_t pitch[nplots]; 
+  Double_t xstrip[nplots][1000];
+  Double_t ystrip[nplots][1000];
+  Int_t nstrip[nplots];
+ 
+  Double_t xm, ym;
+  Int_t entries=0;
+  Int_t entries1[nplots]=0;
+  Int_t entriesx[nplots][1000]=0;
+  Int_t entriesy[nplots][1000]=0;
+  Int_t checkx[nplots]=0;
+  Int_t checky[nplots]=0;
+  Int_t check=0;
+  Int_t stripfiredx[nplots][1000]=0;
+  Int_t stripfiredy[nplots][1000]=0;
+  Int_t stripfirex[nplots]=0;
+  
+  
+  Double_t xrec[nplots][1000];
+  Double_t xrec1[nplots];
+  Double_t yrec[nplots][1000];
+  Double_t yrec1[nplots];
+  Double_t hitx[nplots],hity[nplots];
+  Double_t xres[nplots], yres[nplots];
+  Double_t xdig1[nplots];
+  Double_t xdig[nplots];
+  Double_t xdig2[nplots]=0;
+
+  Int_t j;
+  
+  
+  //Parameters Input in cm
+  Float_t range_min=-0.5;
+  Float_t range_max= 1.5;
+  Float_t pitch_min= 0.0050;
+  //Float_t pitch_min= 0.020;
+  //Int_t THR= 3; // numero di elettroni cut per histo cluster size
+  Int_t THR= 0; // numero di elettroni cut per  histo cluster size
+  ifstream ifile(data);
+  if (ifile) {
+    printf("processing file %s\n",data);
+    // The file exists, and is open for input   
+    TFile *f = new TFile(rootupla,"RECREATE");
+    
+    TTree *t = new TTree("data","data");
+    t->Branch("track",&track,"track/I");
+    t->Branch("c",&c,"c/I");
+    t->Branch("np",&np,"np/I");
+    t->Branch("i",&i,"i/I");
+    t->Branch("xs",&xs,"xs/F");
+    t->Branch("ys",&ys,"ys/F");
+    t->Branch("zs",&zs,"zs/F");
+    t->Branch("xend",&xend,"xend/F");
+    t->Branch("yend",&yend,"yend/F");
+    t->Branch("zend",&zend,"zend/F");
+    t->Branch("tend",&tend,"tend/F");
+    t->Branch("statuse",&statuse,"statuse/F");
+    t->Branch("xmean",&xmean,"xmean/F");
+    t->Branch("ymean",&ymean,"ymean/F");
+  
+    TH1F *h100 = new TH1F("h100","X Residual - Infinitesimal pitch ",150,-1.,1.);
+    TH1F *h200 = new TH1F("h200","Y Residual - Infinitesimal pitch ",150,-1.,1.);
+    TH1F *h301 = new TH1F("h301","X Cluster Uniform Distribution",1000,0.,1.);
+    TH1F *h302 = new TH1F("h302","Y Cluster Uniform Distribution",1000,0.,1.);
+    TH2F *h303 = new TH2F("h303","X-Y Cluster Uniform Distribution",1000,0.,1.,1000,0.,1.);
+ 
+    TH1F *myhistx[nplots];
+    TH1F *myhisty[nplots*2];
+    TH1F *myhitx[nplots*3];
+    TH1F *myhity[nplots*4]; 
+    TH1F *myhistx2[nplots*5];
+   
+    char *histnamex = new char[10];
+    char *histitlex = new char[50];
+    char *histnamey = new char[10];
+    char *histitley = new char[50];
+    char *histnamex1 = new char[10];
+    char *histitlex1 = new char[50];   
+    char *histnamey1 = new char[10];
+    char *histitley1 = new char[50];
+    
+    char *histnamex2 = new char[10];
+    char *histitlex2 = new char[50];
+
+    Int_t pitchtit[nplots];
+    char units[nplots]="microns";
+
+    range =(range_max- range_min);    
+
+    for (j=1;j<nplots;j++) {
+      pitch[j]=float(pitch_min*j);
+      nstrip[j]=range/pitch[j];
+
+      pitchtit[j]=(float((pitch_min*j))*10000)+1;
+      //cout <<  pitchtit[j] << endl;
+      sprintf(histnamex,"h%d",j);
+      sprintf(histitlex,"X Residual- Width Strip = %d %s",pitchtit[j],units);
+      sprintf(histnamex1,"hit%d",j);
+      sprintf(histitlex1,"X Cluster Size - Width Strip = %d %s",pitchtit[j],units);
+      sprintf(histnamex2,"dig%d",j);
+      sprintf(histitlex2,"X Residual- Width Strip = %d %s",pitchtit[j],units);
+
+      //- Aligned with Holes
+      l=j+nplots-1;
+      sprintf(histnamey,"h%d",l);
+      sprintf(histitley,"Y Residual- Width Strip = %d %s",pitchtit[j],units);
+      sprintf(histnamey1,"hit%d",l);
+      sprintf(histitley1,"Y Cluster Size - Width Strip = %d %s",pitchtit[j],units);
+      //Not Aligned With Holes 
+      Int_t nbins=nstrip[j]+1;
+      //cout << nbins << " " << pitchtit[j] << endl;
+
+      myhistx[j] = new TH1F(histnamex, histitlex ,100,-1.,1.);  
+      myhitx[j] = new TH1F(histnamex1, histitlex1 ,10,0.,9.);  
+      myhistx2[j] = new TH1F(histnamex2, histitlex2 ,100,-1.,1.);
+       
+      myhisty[l] = new TH1F(histnamey, histitley ,100,-1.,1.);
+      myhity[l] = new TH1F(histnamey1, histitley1 ,10,0.,9.);
+    }
+    
+ 
+    //    range =(range_max- range_min);    
+    
+    for (j=1;j<nplots;j++) {
+      pitch[j]=float(pitch_min*j);
+      nstrip[j]=range/pitch[j];
+      //cout << pitch[j] << " " << (nstrip[j]+1) << endl;
+      for (k=0; k<=(nstrip[j]+1);k++) {
+	xstrip[j][k]= (k*pitch[j])+range_min;
+	ystrip[j][k]= (k*pitch[j]+0.0070);
+	//cout <<  xstrip[j][k]  << endl; 
+      }
+    }
+   
+    in.open(data);
+     
+    if (!in.is_open()) 
+    else  printf("Opening File: %s\n", data);
+   
+    while(!in.eof()) {
+      in >> track >> c >> np >> i >> xs >> ys >> zs >> xend >> yend >> zend >> statuse;
+      if (in.good()) {   
+	t->Fill();     
+	//	if (statuse==-6 && zend<0.0005 && track<=580) {
+	if (statuse==-6 && zend<0.0005) {
+	  xm= xm + xend;
+	  ym= ym + yend;
+	  entries++;
+	  for (j=1;j<nplots;j++) {
+	    for (k=0; k<=(nstrip[j]+1);k++)  {
+	      if (xend< (xstrip[j][k]+(pitch[j]/2)) && xend>= (xstrip[j][k]-(pitch[j]/2)) ) {    
+		entriesx[j][k]++;
+		if (entriesx[j][k]>THR) {
+		  stripfiredx[j][k]=1; //moltiplicità hit
+		  entries1[j]++; //per denominatore FEE analogico
+		}
+		//		stripfirex[j]= stripfiredx[j][k]; 
+	      }
+	      
+	      
+	      if (yend< (ystrip[j][k]+(pitch[j]/2)) && yend>=(ystrip[j][k]-(pitch[j]/2)) ) {        
+		entriesy[j][k]++;
+		stripfiredy[j][k]=1;
+	      }
+	    } //for (k=0; k<=(nstrip[j]+1);k++)
+	  } // for (j=1;j<=2;j++)	  
+	}  // if (statuse==-6)
+      } //if in.good())
+      	
+      else {
+	if (entries>0.) {
+	  h301->Fill(xs);
+	  h302->Fill(ys);
+	  h303->Fill(xs,ys);
+	  xmean=(xs-float (xm/entries))*10;
+	  ymean=(ys-float (ym/entries))*10;
+	  h100->Fill(xmean);
+	  h200->Fill(ymean);        
+	  for (j=1;j<nplots;j++) {
+	    checkx[j]=0;
+	    for (k=0; k<=(nstrip[j]+1);k++)  {
+	      checkx[j]=checkx[j]+entriesx[j][k];
+	      checky[j]=checky[j]+entriesy[j][k];
+	    }
+	    if (checkx[j]!=entries) {
+	      cout << "Non tutte le entries !!!" << endl; 
+	      //cout << run << " ; " << track << " ; " << c << " ; " <<  np << "; " << i << " ; " << xend << " ; " << yend <<  " ; " << zend <<  " ; " << entries << " ; " << checkx[j] << " " << j << endl; 
+	    }
+	    check=check+checkx[j];
+	    
+	    for (k=0; k<=(nstrip[j]+1);k++)  {
+	      if (entriesx[j][k]>THR) {
+		xrec[j][k]= float (xstrip[j][k]*(entriesx[j][k]-THR))/(entries1[j]); 
+		xrec1[j]= xrec1[j]+xrec[j][k];
+		hitx[j]=hitx[j]+stripfiredx[j][k]; //da controllare
+		xdig1[j] = xdig1[j]+xstrip[j][k];//numeratore per FEE digitale
+		stripfirex[j]++;//per denominatore FEE digitale	
+		//cout << track << endl;
+		//cout << xdig1[j] << " " << xstrip[j][k] << " " << stripfirex[j] << endl;
+	      }
+	     
+	      yrec[j][k]= float (ystrip[j][k]*entriesy[j][k])/(entries); 
+	      yrec1[j]= yrec1[j]+yrec[j][k];
+	      if (entriesy[j][k]>THR) {hity[j]=hity[j]+stripfiredy[j][k];}
+	    }
+	    
+	    if (xrec1[j]!=0.) {
+	      xres[j]=(xs-xrec1[j])*10;
+	      myhistx[j]->Fill(xres[j]);
+	    }
+	    if (stripfirex[j]!=0) {
+	      xdig2[j]=xdig1[j]/stripfirex[j];
+	      xdig[j]=(xs-xdig2[j])*10;
+	      myhistx2[j]->Fill(xdig[j]);
+	      //cout << track << endl;
+	      //cout <<  xdig2[j] << " " << xdig1[j] << " " << entries1[j] << " " << entries << endl;
+	    }
+	    if (hitx[j]>0) {myhitx[j]->Fill(hitx[j]);}
+	    
+	    
+	    l=j+nplots-1;
+	    yres[j]=(ys-yrec1[j])*10;
+	    myhisty[l]->Fill(yres[j]);
+	    if (hity[j]>0) {myhity[l]->Fill(hity[j]);}
+		      
+	  }
+	} //entries>0.
+
+	in.clear();
+	
+	m++;
+	if (m%100==0 && m>1.) { 
+	  	cout << "track processing ..." << m << endl; 
+	}
+	entries=0;
+	xmean=0.;
+	ymean=0.;
+	xm=0.;
+	ym=0.;
+
+	for (j=1;j<nplots;j++) {
+	  for (k=0; k<=(nstrip[j]+1);k++)  {
+	    entriesx[j][k]=0;
+	    entriesy[j][k]=0;
+	    stripfiredx[j][k]=0;
+	    stripfiredy[j][k]=0;
+	    xrec[j][k]=0.;
+	    yrec[j][k]=0.;
+	    
+	  }
+	  xrec1[j]=0.;
+	  xres[j]=0.;
+	  yrec1[j]=0.;
+	  yres[j]=0.;
+	  checkx[j]=0;
+	  checky[j]=0;
+	  hitx[j]=0.;
+	  hity[j]=0.;
+	  xdig2[j]=0.;
+	  xdig1[j]=0.;
+	  xdig[j]=0.;
+	  entries1[j]=0;
+	  stripfirex[j]=0;
+	}  
+	check=0;
+	in.ignore(80,'\n'); 
+	continue;
+      } 
+    } //else */ 
+    //t->Write();
+    in.close(); 
+    f->Write();
+    
+    Long64_t nentries = t->GetEntries();
+    cout << "Number of Entries " << nentries << endl;
+    
+
+   return;
+   t->Close();
+  }
+  else  printf("Doesn't Exist The File Data: %s\n", data);
+  
+}

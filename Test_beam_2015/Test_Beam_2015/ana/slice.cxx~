@@ -1,0 +1,39 @@
+{
+
+/from rootlogon.C
+  TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  hipStyle->SetOptStat(0);
+
+TFile *hfile = new TFile("ana_rec_0T.root");
+
+
+
+}

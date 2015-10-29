@@ -1,0 +1,94 @@
+{ 
+//from rootlogon.C
+  TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  hipStyle->SetOptStat(1000000);
+
+  c1 = new TCanvas("c1","RWELL - Pitch 100 micro AR/ISO=90/10 B=0 T");
+
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_0T_H4_2014_new.root");  
+  h8->SetLineColor(2);
+  h8->SetMarkerColor(2);
+  //h8->Scale(10);
+  h8->Fit("gaus","same");
+
+  
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_0T_ARCO2.root");  
+  h8->SetLineColor(4);
+  h8->SetMarkerColor(4);
+  //h8->Scale(8);
+  h8->Fit("gaus","R","sames");
+
+  TFile *hfile = new TFile("ana_rec_run_0T.root");
+  WELL1HresY->Scale(0.105);
+  WELL1HresY->Draw("same");
+  WELL1HresY->Fit("gaus","R","sames");
+
+
+  c2 = new TCanvas("c2","RWELL - Pitch 100 micro AR/ISO=90/10 B = 0.5 T");
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_05T_H4_2014_new.root");
+  h8->SetLineColor(2);
+  h8->SetMarkerColor(2);
+  //h8->Scale(7);
+  h8->Fit("gaus","same");
+
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_05T_ARCO2.root");  
+  h8->SetLineColor(4);
+  h8->SetMarkerColor(4);
+  //h8->Scale(5);
+  h8->Fit("gaus","R","sames");
+
+
+  TFile *hfile = new TFile("ana_rec_run_05T.root");
+  WELL1HresY->Scale(0.155);
+  WELL1HresY->Fit("gaus","R","sames");
+
+
+  c3 = new TCanvas("c3","RWELL - Pitch 100 micro AR/ISO=90/10 B = 1 T");
+
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_1T_H4_2014_new.root");
+  h8->SetLineColor(2);
+  h8->SetMarkerColor(2);
+  //h8->Scale(6);
+  h8->Fit("gaus","same");
+  
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_1T_ARCO2.root");  
+  h8->SetLineColor(4);
+  h8->SetMarkerColor(4);
+  //h8->Scale(5);
+  h8->Fit("gaus","R","sames");
+
+  TFile *hfile = new TFile("ana_rec_run_1T.root");
+  WELL1HresY->Scale(0.147);
+  WELL1HresY->Fit("gaus","R","sames");
+
+  
+ 
+}

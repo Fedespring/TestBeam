@@ -1,0 +1,178 @@
+{
+  TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  hipStyle->SetOptStat(10);
+
+
+  TFile *hfile = new TFile("ana_rec_run316_sliceX.root");
+
+  c1 = new TCanvas("c1","RWELL - AR/ISO=90/10",1500,900);
+  c1->Divide(3,3);
+  c1_1->cd(); 
+  WY1->Fit("gaus","R");
+  c1_2->cd();
+  WY2->Fit("gaus","R");
+  c1_3->cd();
+  WY3->Fit("gaus","R"); 
+  c1_4->cd();
+  WY4->Fit("gaus","R");
+  c1_5->cd();
+  WY5->Fit("gaus","R");
+  c1_6->cd();
+  WY6->Fit("gaus","R");
+  c1_7->cd();
+  WY7->Fit("gaus","R");
+  c1_8->cd();
+  WY8->Fit("gaus","R");
+  c1_9->cd();
+  WY9->Fit("gaus","R");
+  /*c1_10->cd();
+  WY10->Fit("gaus","R");
+  c1_11->cd();
+  WY11->Fit("gaus","R");
+  c1_12->cd();
+  WY12->Fit("gaus","R");*/
+
+
+  double Yentries[12];
+  double Ymean[12];
+  double Ymeanerr[12];
+  double Yrms[12];
+  double Yrmserr[12];
+
+  
+  double Y1  = WY1->GetEntries();
+  double Ymean1     = WY1->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr1  = WY1->GetFunction("gaus")->GetParError(1);
+  double Yrms1      = WY1->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr1   = WY1->GetFunction("gaus")->GetParError(2);
+
+  double Y2  = WY2->GetEntries();
+  double Ymean2     = WY2->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr2  = WY2->GetFunction("gaus")->GetParError(1);
+  double Yrms2      = WY2->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr2   = WY2->GetFunction("gaus")->GetParError(2);
+
+  double Y3  = WY3->GetEntries();
+  double Ymean3     = WY3->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr3  = WY3->GetFunction("gaus")->GetParError(1);
+  double Yrms3      = WY3->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr3   = WY3->GetFunction("gaus")->GetParError(2);
+
+  double Y4  = WY4->GetEntries();
+  double Ymean4     = WY4->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr4  = WY4->GetFunction("gaus")->GetParError(1);
+  double Yrms4      = WY4->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr4   = WY4->GetFunction("gaus")->GetParError(2);
+
+  double Y5  = WY5->GetEntries();
+  double Ymean5     = WY5->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr5  = WY5->GetFunction("gaus")->GetParError(1);
+  double Yrms5      = WY5->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr5   = WY5->GetFunction("gaus")->GetParError(2);
+
+  double Y6  = WY6->GetEntries();
+  double Ymean6     = WY6->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr6  = WY6->GetFunction("gaus")->GetParError(1);
+  double Yrms6      = WY6->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr6   = WY6->GetFunction("gaus")->GetParError(2);
+  
+  double Y7  = WY7->GetEntries();
+  double Ymean7     = WY7->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr7  = WY7->GetFunction("gaus")->GetParError(1);
+  double Yrms7      = WY7->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr7   = WY7->GetFunction("gaus")->GetParError(2);
+  
+  double Y8  = WY8->GetEntries();
+  double Ymean8     = WY8->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr8  = WY8->GetFunction("gaus")->GetParError(1);
+  double Yrms8      = WY8->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr8   = WY8->GetFunction("gaus")->GetParError(2);
+
+  double Y9  = WY9->GetEntries();
+  double Ymean9     = WY9->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr9  = WY9->GetFunction("gaus")->GetParError(1);
+  double Yrms9      = WY9->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr9   = WY9->GetFunction("gaus")->GetParError(2);
+  
+  /*double Y10  = WY10->GetEntries();
+  double Ymean10     = WY10->GetFunction("gaus")->GetParameter(1);
+  double Ymeanerr10  = WY10->GetFunction("gaus")->GetParError(1);
+  double Yrms10      = WY10->GetFunction("gaus")->GetParameter(2);
+  double Yrmserr10   = WY10->GetFunction("gaus")->GetParError(2);*/
+
+    //  double Y[12];
+
+  double pos[12];
+  double poserr[12];
+  double mean[12];
+  double meanerr[12];
+  double rms[12];
+  double rmserr[12];
+
+
+
+    
+  for (int i=0;i<=9;i++) {
+    double pos[i]=-30+i*5.;
+    double poserr[i]=1;
+  } 
+
+   int j=8;
+  double mean[j]={Ymean2,Ymean3,Ymean4,Ymean5,Ymean6,Ymean7,Ymean8,Ymean9};
+  double meanerr[j]={Ymeanerr2,Ymeanerr3,Ymeanerr4,Ymeanerr5,Ymeanerr6,Ymeanerr7,Ymeanerr8,Ymeanerr9};
+ 
+  c2 = new TCanvas();
+  mg = new TMultiGraph();
+  TGraphErrors *gr1 = new TGraphErrors(j,pos,mean,poserr,meanerr);
+  gr1->SetMarkerStyle(20);
+  mg->Add(gr1);
+  mg->Draw("ap");
+  mg->Fit("pol1");
+  mg->GetXaxis()->SetTitle("Position Slice (mm)");
+  mg->GetYaxis()->SetTitle("Residual Mean (mm)");
+
+  double rms[j]={Yrms2,Yrms3,Yrms4,Yrms5,Yrms6,Yrms7,Yrms8,Yrms9};
+  double rmserr[j]={Yrmserr2,Yrmserr3,Yrmserr4,Yrmserr5,Yrmserr6,Yrmserr7,Yrmserr8,Yrmserr9};
+
+
+  c3 = new TCanvas();
+  mg1 = new TMultiGraph();
+  TGraphErrors *gr2 = new TGraphErrors(j,pos,rms,poserr,rmserr);
+  gr2->SetMarkerStyle(20);
+  mg1->Add(gr2);
+  mg1->Draw("ap");
+  //mg1->Fit("pol1");
+  mg1->GetXaxis()->SetTitle("Position Slice (mm)");
+  mg1->GetYaxis()->SetTitle("Residual RMS (mm)");
+  
+
+
+}

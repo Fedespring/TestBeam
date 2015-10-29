@@ -1,0 +1,77 @@
+{
+  gROOT->Reset();
+   TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.06);
+  hipStyle->SetTitleYSize(0.06);
+  //hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.04,"y");
+  hipStyle->SetTitleOffset(0.75,"y");
+
+  gROOT->SetStyle("clearRetro");
+
+
+  const Int_t n=3;  
+
+  Float_t besIIIcs[n]= {3.0,4.4,7.3};
+  Float_t trkcs[n]   = {2.4,2.55,3.4};
+  Float_t rwellcs[n] = {2.98,3.1,3.38};
+
+
+  Float_t erresidual80M[n]={2, 3, 1,  2, 2, 1, 1, 1, 1, 1, 2, 2,  2,  3};
+  Float_t bfield[n]={-1,-0.8,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,1};
+  Float_t errbfield[n]={0.*n};
+  
+  Float_t residualtracker[n]={416,341,232,206,178,156,154,140,145,149,168,186,212,360};
+  Float_t erresidualtracker[n]={13,26,12,13,13,10,11,6,9,9,10,13,10,12};
+
+  Float_t sigmacorr[n]={25,25,25,25,25,25,25,25,25,25,25,25,25,25};
+  Float_t errsigmacorr[n]={1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.};
+
+  Float_t sigmatrk[n]={0.*n};
+  Float_t errsigmatrk[n]={0.*n};
+  Float_t sigmafit[n]={0.*n};
+  Float_t errsigmafit[n]={0.*n};
+  Float_t spatialres[n]={0.*n};
+  Float_t errspatialres[n]={0.*n};
+ 
+
+  for (int i=0;i<14; i++) {
+    sigmatrk[i]=residualtracker[i]/sqrt(4);
+    errsigmatrk[i]=sqrt(4*(erresidualtracker[i]/5)**2)/sqrt(4);
+
+    sigmafit[i]=sigmatrk[i]/(sqrt(3));
+    errsigmafit[i]=sqrt(3*errsigmatrk[i]**2)/sqrt(3);
+
+    spatialres[i]=sqrt( (residual80M[i]**2) - (sigmafit[i]**2) - (sigmacorr[i]**2) );
+    errspatialres[i]= sqrt( (erresidual80M[i]**2) + (errsigmafit[i]**2) + (errsigmacorr[i]**2) );
+  
+    cout << "Magnetic Field " << bfield[i] << endl;
+    cout << "Average TRK Residual             " << residualtracker[i] << " +- " << erresidualtracker[i] << endl;
+    cout << "Average TRK Spatial Resolution   " << (int) sigmatrk[i]        << " +- " << (int) errsigmatrk[i] << endl;
+    cout << "Sigma of the Fit with 3-TRACKERS " << (int) sigmafit[i]        << " +- " << (int) errsigmafit[i] << endl;
+    cout << " " << endl;
+    cout << "micro-RWELL Spatial Resolution   " << (int) spatialres[i]      << " +- " << (int) errspatialres[i] << endl;
+    cout << " ***********************************************************" << endl;
+  }
+  

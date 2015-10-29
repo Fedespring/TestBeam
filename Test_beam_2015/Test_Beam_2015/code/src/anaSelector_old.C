@@ -1,0 +1,1474 @@
+#define anaSelector_cxx
+
+#include "TVirtualFitter.h"
+#include <math.h>
+#include <iostream>
+#include <fstream>
+#include "ana.h"
+#include "anaSelector.h"
+#include "parameters.h"
+#include <cmath>  
+
+
+double fResY(int trkA, int trkB, int trkC, int trkD, int test, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2, float *dispY_trkA, float *dispY_trkB,float *dispY_trkD);
+
+
+//WELL PART
+//4 TRACKERS
+double W4fResY(int trkA, int trkB, int trkC, int trkD, int WELL, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2, float *WdispY_trkA, float *WdispY_trkB, float *WdispY_trkC,float *WdispY_trkD);
+
+//3 TRACKERS
+double W3fResY(int trkA, int trkB, int trkC, int trkD, int WELL, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2, double*p1,float *WdispY_trkA, float *WdispY_trkB, float *WdispY_trkD);
+
+//WELL DENTRO IL TRACCIAMENTO DEL FIT
+double W1fResY(int trkA, int trkB, int WELL, int trkD, int test, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2, float *W1dispY_trkA, float *W1dispY_trkB, float *W1dispY_WELL, float *W1dispY_trkD);
+
+
+//RESIDUI DEI TRACCIATORI
+double TRKAfResY(int trkB , int trkC, int trkD, int trkA, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *trkAdispY_trkB, float *trkAdispY_trkC, float *trkAdispY_trkD);
+double TRKBfResY(int trkA , int trkC, int trkD, int trkB, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkC, float *dispY_trkD);
+double TRKCfResY(int trkA , int trkB, int trkD, int trkC, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkB, float *dispY_trkD);
+double TRKDfResY(int trkA , int trkB, int trkC, int trkD, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkB, float *dispY_trkC);
+
+
+		    
+
+using namespace std;
+using std::cout;
+using std::endl;
+
+void anaSelector::Begin(TTree * /*tree*/, TString inFile)
+{
+	cout << "Begin selector ... " << endl;
+	
+	TString rootFile = AnaDir+"ana_";
+	rootFile += inFile;
+	cout<<rootFile<<endl;
+	myfile = new TFile(rootFile,"RECREATE");
+
+	NGOOD = 0;
+	NGOODWELL =0;
+	// NGOODTestX = NGOODTestY = nGemClustermin3sX = nGemClustermin3sY = nGemClusterExtraX = nGemClusterExtraY = nGOODmin3sX = nGOODmin3sY = nGOODmin3sXY = 0;
+	
+	//WELL PART
+	NGOODWELLY = NGOODWELLYClust1 = 0;
+	nWELLAllClusterInY = nWELLAllClusterExtraY = 0;
+	nWELLSingleClusterInY = nWELLSingleClusterExtraY =  0;
+
+	//NGOODWELLY = nWELLClustermin3sY = nWELLClusterExtraY = nGOODWELLmin3sY = NGOODWELLYClust1 = 0;
+
+	HresX = new TH1D();
+	HresX->SetName("HresX");
+	HresX->SetTitle("Residual Distribution X-Strips within 3Sigma");
+	HresX->SetBins(100,-1,1);  
+	
+	HresAllX = new TH1D();
+	HresAllX->SetName("HresAllX");
+	HresAllX->SetTitle("Residual Distribution X-Strips");
+	HresAllX->SetBins(500,-10,10); 
+	
+	HresY= new TH1D();
+	HresY->SetName("HresY");
+	HresY->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	HresY->SetBins(100,-1,1);
+	
+	HresAllY= new TH1D();
+	HresAllY->SetName("HresAllY");
+	HresAllY->SetTitle("Residual Distribution Y-Strips");
+	HresAllY->SetBins(500,-10,10);
+
+	
+	trkA_resY= new TH1D();
+	trkA_resY->SetName("trkA_resY");
+	trkA_resY->SetTitle("Residual Distribution Y-Strips - TRACKER A");
+	trkA_resY->SetBins(100,-5,5);
+
+	trkB_resY= new TH1D();
+	trkB_resY->SetName("trkB_resY");
+	trkB_resY->SetTitle("Residual Distribution Y-Strips - TRACKER B");
+	trkB_resY->SetBins(100,-5,5);
+
+	trkB_Chi2= new TH1D();
+	trkB_Chi2->SetName("trkB_Chi2");
+	trkB_Chi2->SetTitle("Chi-Square Distribution Y-Strips ");
+	trkB_Chi2->SetBins(100,0,25);
+
+	trkC_resY= new TH1D();
+	trkC_resY->SetName("trkC_resY");
+	trkC_resY->SetTitle("Residual Distribution Y-Strips - TRACKER C");
+	trkC_resY->SetBins(100,-5,5);	
+
+	trkD_resY= new TH1D();
+	trkD_resY->SetName("trkD_resY");
+	trkD_resY->SetTitle("Residual Distribution Y-Strips - TRACKER D");
+	trkD_resY->SetBins(100,-5,5);
+
+	
+	/*TRKAResClu=  new TH2F("TRKAResClu","",100,-1.,1.,6,0.,6.);
+	TRKAResY=      new TH2F("TRKAResY","",100,-1.,1.,10,-12.,28.);  
+	TRKAResQ=      new TH2F("TRKAResQ","",100,-1.,1.,200,0,5000.);
+	TRKAYQ=      new TH2F("TRKAYQ","",10,-12.,28.,200,0,5000.);
+	TRKAResChi2=  new TH2F("TRKAResChi2","",100,-1.,1.,3,0.,3.);
+	TRKACluQ= new TH2F("TRKACluQ","",6,0.,6.,200,0,5000.);*/
+
+
+	//WELLL PART
+	numClustWELLY= new TH1I();
+	numClustWELLY->SetName("numClustWELLY");
+	numClustWELLY->SetTitle("Number of Y-Cluster");
+	numClustWELLY->SetBins(20,0,20);
+			
+	//WELL EVENTI CON PIU CLUSTER
+	WELLTotHresY= new TH1D();
+	WELLTotHresY->SetName("WELLTotHresY");
+	WELLTotHresY->SetTitle("Residual Distribution Y-Strips - All Clusters");
+	WELLTotHresY->SetBins(100,-1,1);
+	
+	WELLTotHresAllY= new TH1D();
+	WELLTotHresAllY->SetName("WELLTotHresAllY");
+	WELLTotHresAllY->SetTitle("Residual Distribution Y-Strips - All Clusters");
+	WELLTotHresAllY->SetBins(500,-10,10);
+
+	WELLTotQ= new TH1D();
+	WELLTotQ->SetName("WELLTotQ");
+	WELLTotQ->SetTitle("WELL Charge Y - All Clusters");
+	WELLTotQ->SetBins(200,0,5000);
+
+	WELLTotChi2Y= new TH1D();
+	WELLTotChi2Y->SetName("WELLTotChi2Y");
+	WELLTotChi2Y->SetTitle("WELL Chi-Square Distribution Y-Strips - All Clusters");
+	WELLTotChi2Y->SetBins(100,0,25);
+
+	All_cluster_size_WELL_In_Y= new TH1I();
+	All_cluster_size_WELL_In_Y->SetName("All_cluster_size_WELL_In_Y");
+	All_cluster_size_WELL_In_Y->SetTitle("All Clusters: Cluster Size WELL Y");
+	All_cluster_size_WELL_In_Y->SetBins(20,0,20);
+
+	All_cluster_size_WELL_Extra_Y= new TH1I();
+	All_cluster_size_WELL_Extra_Y->SetName("All_cluster_size_WELL_Extra_Y");
+	All_cluster_size_WELL_Extra_Y->SetTitle("All Clusters: Cluster Size WELL Y - Cluster farther than 3 Sigma");
+	All_cluster_size_WELL_Extra_Y->SetBins(20,0,20);
+
+	numAllClustWELLInY= new TH1I();
+	numAllClustWELLInY->SetName("numAllClustWELLInY");
+	numAllClustWELLInY->SetTitle("All Clusters: Number of Y-Clusters WELL");
+	numAllClustWELLInY->SetBins(20,0,20);
+	
+	numAllClustWELLExtraY= new TH1I();
+	numAllClustWELLExtraY->SetName("numAllClustWELLExtraY");
+	numAllClustWELLExtraY->SetTitle("All Clusters: Number of Y-Clusters WELL farther than 3 Sigma");
+	numAllClustWELLExtraY->SetBins(20,0,20);
+
+
+
+	
+	//WELLTotResClu = new TH2F("WELLTotResClu","",100,-1.,1.,6,0.,6.);
+
+	//WELL SINGOLO CLUSTER
+	WELL1HresY= new TH1D();
+	WELL1HresY->SetName("WELL1HresY");
+	WELL1HresY->SetTitle("Residual Distribution Y-Strips - Single Cluster");
+	WELL1HresY->SetBins(100,-1,1);
+	
+	WELL1HresAllY= new TH1D();
+	WELL1HresAllY->SetName("WELL1HresAllY");
+	WELL1HresAllY->SetTitle("Residual Distribution Y-Strips - Single Cluster");
+	WELL1HresAllY->SetBins(500,-10,10);
+
+	WELL1Q= new TH1D();
+	WELL1Q->SetName("WELL1Q");
+	WELL1Q->SetTitle("WELL Charge Y - Single cluster");
+	WELL1Q->SetBins(200,0,5000);
+
+	WELL1Chi2Y= new TH1D();
+	WELL1Chi2Y->SetName("WELL1Chi2Y");
+	WELL1Chi2Y->SetTitle("WELL Chi-Square Distribution Y-Strips - Single Cluster");
+	WELL1Chi2Y->SetBins(100,0,25);
+
+	TRACKER_p1= new TH1D();
+	TRACKER_p1->SetName("TRACKER_p1");
+	TRACKER_p1->SetTitle("WELL Linear Fit p1 - Single Cluster");
+	TRACKER_p1->SetBins(100,-0.02,0.02);
+
+	WELL1ResY=      new TH2F("WELL1ResY","",100,-1.,1.,10,-12.,28.);
+
+	Single_cluster_size_WELL_In_Y= new TH1I();
+	Single_cluster_size_WELL_In_Y->SetName("Single_cluster_size_WELL_In_Y");
+	Single_cluster_size_WELL_In_Y->SetTitle("Single Cluster: Cluster Size WELL Y");
+	Single_cluster_size_WELL_In_Y->SetBins(20,0,20);
+
+	Single_cluster_size_WELL_Extra_Y= new TH1I();
+	Single_cluster_size_WELL_Extra_Y->SetName("Single_cluster_size_WELL_Extra_Y");
+	Single_cluster_size_WELL_Extra_Y->SetTitle("Single Cluster: Cluster Size WELL Y - Cluster farther than 3 Sigma");
+	Single_cluster_size_WELL_Extra_Y->SetBins(20,0,20);
+
+	numSingleClustWELLInY= new TH1I();
+	numSingleClustWELLInY->SetName("numSingleClustWELLInY");
+	numSingleClustWELLInY->SetTitle("Single Clusters: Number of Y-Clusters WELL");
+	numSingleClustWELLInY->SetBins(20,0,20);
+	
+	numSingleClustWELLExtraY= new TH1I();
+	numSingleClustWELLExtraY->SetName("numSingleClustWELLExtraY");
+	numSingleClustWELLExtraY->SetTitle("Single Clusters: Number of Y-Clusters WELL farther than 3 Sigma");
+	numSingleClustWELLExtraY->SetBins(20,0,20);
+
+
+	/*WELLResClu=  new TH2F("WELLResClu","",100,-1.,1.,6,0.,6.);
+	
+	WELLResQ=      new TH2F("WELLResQ","",100,-1.,1.,200,0,5000.);
+	WELLYQ=      new TH2F("WELLYQ","",10,-12.,28.,200,0,5000.);
+	WELLResChi2=  new TH2F("WELLResChi2","",100,-1.,1.,3,0.,3.);
+	WELLCluQ= new TH2F("WELLCluQ","",6,0.,6.,200,0,5000.);*/
+	
+
+
+	//WELL Di SINGOLO CLUSTER CON CLUSTER SIZE 2,3,4
+	WELL2HresY= new TH1D();
+	WELL2HresY->SetName("WELL2HresY");
+	WELL2HresY->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WELL2HresY->SetBins(100,-1,1);
+
+	WELL3HresY= new TH1D();
+	WELL3HresY->SetName("WELL3HresY");
+	WELL3HresY->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WELL3HresY->SetBins(100,-1,1);
+
+	WELL4HresY= new TH1D();
+	WELL4HresY->SetName("WELL4HresY");
+	WELL4HresY->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WELL4HresY->SetBins(100,-1,1);
+
+	WELL5HresY= new TH1D();
+	WELL5HresY->SetName("WELL5HresY");
+	WELL5HresY->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WELL5HresY->SetBins(100,-1,1);
+
+	//__________________________________________	
+	
+	
+	
+
+	WY1= new TH1D();
+	WY1->SetName("WY1");
+	WY1->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY1->SetBins(100,-1,1);
+
+	WY2= new TH1D();
+	WY2->SetName("WY2");
+	WY2->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY2->SetBins(100,-1,1);
+
+	WY3= new TH1D();
+	WY3->SetName("WY3");
+	WY3->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY3->SetBins(100,-1,1);
+
+	WY4= new TH1D();
+	WY4->SetName("WY4");
+	WY4->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY4->SetBins(100,-1,1);
+
+	WY5= new TH1D();
+	WY5->SetName("WY5");
+	WY5->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY5->SetBins(100,-1,1);
+
+	WY6= new TH1D();
+	WY6->SetName("WY6");
+	WY6->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY6->SetBins(100,-1,1);
+
+	WY7= new TH1D();
+	WY7->SetName("WY7");
+	WY7->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY7->SetBins(100,-1,1);
+
+	WY8= new TH1D();
+	WY8->SetName("WY8");
+	WY8->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY8->SetBins(100,-1,1);
+
+	/*	WY9= new TH1D();
+	WY9->SetName("WY9");
+	WY9->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY9->SetBins(100,-1,1);
+
+	WY10= new TH1D();
+	WY10->SetName("WY10");
+	WY10->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY10->SetBins(100,-1,1);*/
+
+	WY11= new TH1D();
+	WY11->SetName("WY11");
+	WY11->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY11->SetBins(100,-1,1);
+
+	WY12= new TH1D();
+	WY12->SetName("WY12");
+	WY12->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY12->SetBins(100,-1,1);
+
+	WY13= new TH1D();
+	WY13->SetName("WY13");
+	WY13->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY13->SetBins(100,-1,1);
+
+	WY14= new TH1D();
+	WY14->SetName("WY14");
+	WY14->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY14->SetBins(100,-1,1);
+
+	WY15= new TH1D();
+	WY15->SetName("WY15");
+	WY15->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY15->SetBins(100,-1,1);
+
+	WY16= new TH1D();
+	WY16->SetName("WY16");
+	WY16->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY16->SetBins(100,-1,1);
+
+	WY17= new TH1D();
+	WY17->SetName("WY17");
+	WY17->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY17->SetBins(100,-1,1);
+
+	WY18= new TH1D();
+	WY18->SetName("WY18");
+	WY18->SetTitle("Residual Distribution Y-Strips within 3Sigma");
+	WY18->SetBins(100,-1,1);
+
+
+	WYAfterCor= new TH1D();
+	WYAfterCor->SetName("WYAfterCor");
+	WYAfterCor->SetTitle("Residual Distribution Y-Strips After Correction");
+	WYAfterCor->SetBins(100,-1,1);
+
+	WYBeforeCor= new TH1D();
+	WYBeforeCor->SetName("WYBeforeCor");
+	WYBeforeCor->SetTitle("Residual Distribution Y-Strips Before Correction");
+	WYBeforeCor->SetBins(100,-1,1);
+
+
+	WELLresY_trkA= new TH1F();
+	WELLresY_trkA->SetName("WELLresY_trkA");
+	WELLresY_trkA->SetTitle("WELL Residual Distribution TRKA Y-Strips");
+	WELLresY_trkA->SetBins(100,-1,1);
+	
+	WELLresY_trkB= new TH1F();
+	WELLresY_trkB->SetName("WELLresY_trkB");
+	WELLresY_trkB->SetTitle("WELL Residual Distribution TRKB Y-Strips");
+	WELLresY_trkB->SetBins(100,-1,1);
+	
+	WELLresY_test= new TH1F();
+	WELLresY_test->SetName("WELLresY_test");
+	WELLresY_test->SetTitle("WELL Residual Distribution TEST Y-Strips");
+	WELLresY_test->SetBins(100,-1,1.);
+
+	WELLresY_trkD= new TH1F();
+	WELLresY_trkD->SetName("WELLresY_trkD");
+	WELLresY_trkD->SetTitle("WELL Residual Distribution TRKD Y-Strips");
+	WELLresY_trkD->SetBins(100,-1,1);
+
+
+	//
+
+	HresY_trkA= new TH1F();
+	HresY_trkA->SetName("HresY_trkA");
+	HresY_trkA->SetTitle("Residual Distribution TRKA Y-Strips");
+	HresY_trkA->SetBins(100,-1,1);
+	
+	HresY_trkB= new TH1F();
+	HresY_trkB->SetName("HresY_trkB");
+	HresY_trkB->SetTitle("Residual Distribution TRKB Y-Strips");
+	HresY_trkB->SetBins(100,-1,1);
+
+	HresY_trkC= new TH1F();
+	HresY_trkC->SetName("HresY_trkC");
+	HresY_trkC->SetTitle("Residual Distribution TRKB Y-Strips");
+	HresY_trkC->SetBins(100,-1,1);
+	
+	HresY_trkD= new TH1F();
+	HresY_trkD->SetName("HresY_trkD");
+	HresY_trkD->SetTitle("Residual Distribution TRKD Y-Strips");
+	HresY_trkD->SetBins(100,-1,1);
+	
+
+	HresX_trkA= new TH1F();
+	HresX_trkA->SetName("HresX_trkA");
+	HresX_trkA->SetTitle("Residual Distribution TRKA X-Strips");
+	HresX_trkA->SetBins(100,-1,1);
+	
+	HresX_trkB= new TH1F();
+	HresX_trkB->SetName("HresX_trkB");
+	HresX_trkB->SetTitle("Residual Distribution TRKB X-Strips");
+	HresX_trkB->SetBins(100,-1,1);
+	
+	HresX_trkC= new TH1F();
+	HresX_trkC->SetName("HresX_trkC");
+	HresX_trkC->SetTitle("Residual Distribution TRKC X-Strips");
+	HresX_trkC->SetBins(100,-1,1);
+	
+	HresX_trkD= new TH1F();
+	HresX_trkD->SetName("HresX_trkD");
+	HresX_trkD->SetTitle("Residual Distribution TRKD X-Strips");
+	HresX_trkD->SetBins(100,-1,1);
+	
+	ChiresX = new TH1D();
+	ChiresX->SetName("ChiresX");
+	ChiresX->SetTitle("Chi-Square Distribution X-Strips");
+	ChiresX->SetBins(100,0,25);  
+	
+
+	
+
+	cluster_size_trkA_Y= new TH1I();
+	cluster_size_trkA_Y->SetName("cluster_size_trkA_Y");
+	cluster_size_trkA_Y->SetTitle("ClusterSize TRKA Y-Strips");
+	cluster_size_trkA_Y->SetBins(20,0,20);
+	
+	cluster_size_trkB_Y= new TH1I();
+	cluster_size_trkB_Y->SetName("cluster_size_trkB_Y");
+	cluster_size_trkB_Y->SetTitle("ClusterSize TRKB Y-Strips");
+	cluster_size_trkB_Y->SetBins(20,0,20);
+	
+	cluster_size_trkC_Y= new TH1I();
+	cluster_size_trkC_Y->SetName("cluster_size_trkC_Y");
+	cluster_size_trkC_Y->SetTitle("ClusterSize TRKD Y-Strips");
+	cluster_size_trkC_Y->SetBins(20,0,20);
+	
+	cluster_size_trkD_Y= new TH1I();
+	cluster_size_trkD_Y->SetName("cluster_size_trkD_Y");
+	cluster_size_trkD_Y->SetTitle("ClusterSize TRKD Y-Strips");
+	cluster_size_trkD_Y->SetBins(20,0,20);
+	
+	cluster_size_trkA_X= new TH1I();
+	cluster_size_trkA_X->SetName("cluster_size_trkA_X");
+	cluster_size_trkA_X->SetTitle("ClusterSize TRKA X-Strips");
+	cluster_size_trkA_X->SetBins(20,0,20);
+	
+	cluster_size_trkB_X= new TH1I();
+	cluster_size_trkB_X->SetName("cluster_size_trkB_X");
+	cluster_size_trkB_X->SetTitle("ClusterSize TRKB X-Strips");
+	cluster_size_trkB_X->SetBins(20,0,20);
+	
+	cluster_size_trkC_X= new TH1I();
+	cluster_size_trkC_X->SetName("cluster_size_trkC_X");
+	cluster_size_trkC_X->SetTitle("ClusterSize TRKC X-Strips");
+	cluster_size_trkC_X->SetBins(20,0,20);
+	
+	cluster_size_trkD_X= new TH1I();
+	cluster_size_trkD_X->SetName("cluster_size_trkD_X");
+	cluster_size_trkD_X->SetTitle("ClusterSize TRKD X-Strips");
+	cluster_size_trkD_X->SetBins(20,0,20);
+	
+	cluster_size_test_min3sX= new TH1I();
+	cluster_size_test_min3sX->SetName("cluster_size_test_min3sX");
+	cluster_size_test_min3sX->SetTitle("ClusterSize TEST X-Strips within 3 Sigma");
+	cluster_size_test_min3sX->SetBins(20,0,20);
+	
+	cluster_size_test_min3sY= new TH1I();
+	cluster_size_test_min3sY->SetName("cluster_size_test_min3sY");
+	cluster_size_test_min3sY->SetTitle("ClusterSize TEST Y-Strips within 3 Sigma");
+	cluster_size_test_min3sY->SetBins(20,0,20);
+	
+	cluster_size_test_ExtraX= new TH1I();
+	cluster_size_test_ExtraX->SetName("cluster_size_test_ExtraX");
+	cluster_size_test_ExtraX->SetTitle("ClusterSize TEST X-Strips farther than 3 Sigma");
+	cluster_size_test_ExtraX->SetBins(20,0,20);
+	
+	cluster_size_test_ExtraY= new TH1I();
+	cluster_size_test_ExtraY->SetName("cluster_size_test_ExtraY");
+	cluster_size_test_ExtraY->SetTitle("ClusterSize TEST Y-Strips farther than 3 Sigma");
+	cluster_size_test_ExtraY->SetBins(20,0,20);
+
+	
+	
+	
+
+	
+
+	
+	numClust= new TH1I();
+	numClust->SetName("numClust");
+	numClust->SetTitle("Number of Cluster");
+	numClust->SetBins(30,0,30);
+	
+	
+	numClustY= new TH1I();
+	numClustY->SetName("numClustY");
+	numClustY->SetTitle("Number of Y-Cluster");
+	numClustY->SetBins(30,0,30);
+	
+	numClustmin3sY= new TH1I();
+	numClustmin3sY->SetName("numClustmin3sY");
+	numClustmin3sY->SetTitle("Number of Y-Cluster within 3 Sigma");
+	numClustmin3sY->SetBins(30,0,30);
+	
+	numExtraClustY= new TH1I();
+	numExtraClustY->SetName("numExtraClustY");
+	numExtraClustY->SetTitle("Number of Y-Cluster farther than 3 Sigma");
+	numExtraClustY->SetBins(30,0,30);
+
+	
+	
+	//
+
+	/*QX= new TH1I();
+	QX->SetName("QX");
+	QX->SetTitle("Charge X cluster");
+	QX->SetBins(200,0,5000);
+
+	QY= new TH1I();
+	QY->SetName("QY");
+	QY->SetTitle("Charge Y cluster");
+	QY->SetBins(200,0,5000);
+	
+	QTOT= new TH1I();
+	QTOT->SetName("QTOT");
+	QTOT->SetTitle("not used");
+	QTOT->SetBins(200,0,5000);*/
+	
+
+
+}
+
+void anaSelector::SlaveBegin(TTree * /*tree*/)
+{
+	TString option = GetOption();
+}
+
+Bool_t anaSelector::Process(Long64_t entry) {
+
+ 
+	
+	fChain->LoadTree(entry);
+	fChain->GetEntry(entry);
+	fChain->GetTreeNumber();
+       
+ 
+
+	if (nGemCluster > 30) return 0;
+	
+	int iClust;
+	double resX, resY;
+	int idTRKA_0,idTRKA_1,idTRKB_0,idTRKB_1,idTRKC_0,idTRKC_1,idTRKD_0,idTRKD_1,idTEST_0,idTEST_1;
+	
+	//WELL PART
+	double WresY,W1resY;
+	int idWELL_1;
+	//
+	/*float CutYXlow=-26.0;//-27
+	  float CutYXhigh=14.0;*///-13
+	  /*float CutXlow=-30.;//-30
+	    float CutXhigh=30.;//10.*/
+	float CutXlow=-30.;//-10 B=0 o 1       //WELL2015  CutXlow=-2;
+	float CutXhigh=30;//20. B=0 o 1      //WELL2015  CutXhigh=12;
+	
+	float CutYlow =-25.;//-20  B=0 o 1  //WELL2015  CutYlow =-16.;
+	float CutYhigh= 8.;//25.  B=0 o 1 //WELL2015 CutYhigh= -2.;
+	//float CutYhigh=0. // run 428 con 4 TRACKERS*/
+	float temp=0;
+	
+	NTRKA_0 = NTRKB_0 = NTRKC_0 = NTRKD_0 = NTEST_0 = NTRKA_1 = NTRKB_1 = NTRKC_1 = NTRKD_1 = NTEST_1 = 0;
+	NWELL_1=0;
+	HitWELL=0;
+
+	if (entry<1) {
+	  cout << "Profile Y Window Cut " << CutYlow << " mm" << endl;
+	  cout << "Profile Y Window Cut + " << CutYhigh << " mm" << endl;
+	  cout << "Profile Y Window " << CutYhigh - CutYlow << " mm" << endl;
+	  cout << endl;
+	  cout << "Profile X Window Cut " << CutXlow << " mm" << endl;
+	  cout << "Profile X Window Cut + " << CutXhigh << " mm" << endl;
+	  cout << "Profile X Window " << CutXhigh - CutXlow << " mm" << endl;
+	  cout << endl;
+	  cout << "Residual in a window of +- " << resCut << " mm" <<  endl;
+	  cout << endl;
+	}
+	if (entry>350) {	
+	if (entry%1000==0)  cout << "now at event " << entry << endl;
+	//cout << "nGemClust =   " << GemCluster1d_plane[iClust] << endl;
+	
+	for(iClust=0;iClust<nGemCluster;iClust++) {
+
+	       //X View Gigi
+	       /*if(GemCluster1d_plane[iClust] == TRKA &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig) {NTRKA_0++; idTRKA_0=iClust;}
+	       if(GemCluster1d_plane[iClust] == TRKB &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig) {NTRKB_0++; idTRKB_0=iClust;}
+	       if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig) {NTRKC_0++; idTRKC_0=iClust;}
+	       if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig) {NTRKD_0++; idTRKD_0=iClust;}
+	       if(GemCluster1d_plane[iClust] == TEST &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig) {NTEST_0++; idTEST_0=iClust;}*/
+
+
+	        //X View Tagli x WELL
+		if(GemCluster1d_plane[iClust] == TRKA &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig&& GemCluster1d_x[iClust]>CutXlow && GemCluster1d_x[iClust]<CutXhigh) {NTRKA_0++; idTRKA_0=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKB &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig&& GemCluster1d_x[iClust]>CutXlow && GemCluster1d_x[iClust]<CutXhigh) {NTRKB_0++; idTRKB_0=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig&& GemCluster1d_x[iClust]>CutXlow && GemCluster1d_x[iClust]<CutXhigh) {NTRKC_0++; idTRKC_0=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_x[iClust]>CutXlow && GemCluster1d_x[iClust]<CutXhigh) {NTRKD_0++; idTRKD_0=iClust;}
+		if(GemCluster1d_plane[iClust] == TEST &&  GemCluster1d_view[iClust] == 0&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_x[iClust]>CutXlow && GemCluster1d_x[iClust]<CutXhigh) {NTEST_0++; idTEST_0=iClust;}
+
+		//Y View Gigi
+		/*if(GemCluster1d_plane[iClust] == TRKA &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKA_1++; idTRKA_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKB &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKB_1++; idTRKB_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKC_1++; idTRKC_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKD_1++; idTRKD_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TEST &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTEST_1++; idTEST_1=iClust;}
+		if(GemCluster1d_plane[iClust] == WELL &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>WELLQCutTrig) {NWELL_1++; idWELL_1=iClust;}*/
+
+		//Y View Tagli x WELL
+		if(GemCluster1d_plane[iClust] == TRKA &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NTRKA_1++; idTRKA_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKB &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NTRKB_1++; idTRKB_1=iClust;}
+		if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NTRKC_1++; idTRKC_1=iClust;}
+		  if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NTRKD_1++; idTRKD_1=iClust;}
+		    /*if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKC_1++; idTRKC_1=iClust;}
+		      if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig) {NTRKD_1++; idTRKD_1=iClust;}*/
+		
+
+		if(GemCluster1d_plane[iClust] == TEST &&  GemCluster1d_view[iClust] == 1&& GemCluster1d_q[iClust]>QCutTrig && GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NTEST_1++; idTEST_1=iClust;}
+		if(GemCluster1d_plane[iClust] == WELL &&  GemCluster1d_view[iClust] == 1 &&GemCluster1d_q[iClust]>WELLQCutTrig &&GemCluster1d_y[iClust]>CutYlow && GemCluster1d_y[iClust]<CutYhigh) {NWELL_1++; idWELL_1=iClust;}
+		//if(GemCluster1d_plane[iClust] == WELL && GemCluster1d_nHit[iClust]<100) {HitWELL++; cout << HitWELL << endl;}
+	 
+		
+	}
+	
+
+	//Richiesta 1 cluster GiGi
+	//	if(NTRKA_0 == 1 && NTRKA_1 == 1 && NTRKB_0 == 1 && NTRKB_1 == 1 && NTRKC_0 == 1 && NTRKC_1 >= 0 && NTRKD_0 == 1 && NTRKD_1 == 1) {
+	if(NTRKA_1 == 1 && NTRKB_1 == 1 && NTRKC_1 == 1 )  {//WELL 2015 
+	   //&& NTRKD_0 >= 1 && NTRKD_1 >= 0) { // perchè la camera C viene letta solo una coordinata in Y e mai in X
+	  
+	        NGOOD++; // denominatore EFFICIENZA
+		if (NWELL_1>=1 ) { NGOODWELL++;} // numero di eventi di singolo cluster
+
+		cluster_size_trkA_Y->Fill(GemCluster1d_nHit[idTRKA_1]);
+		cluster_size_trkB_Y->Fill(GemCluster1d_nHit[idTRKB_1]);
+		cluster_size_trkC_Y->Fill(GemCluster1d_nHit[idTRKC_1]);
+		cluster_size_trkD_Y->Fill(GemCluster1d_nHit[idTRKD_1]);
+				
+		numClust->Fill(nGemCluster);
+		
+		//STIMA DEI RESIDUI DEI TRACCIATORI
+		// Tagli per B=0 T >=-15. <=-5.
+		// Tagli per B=-1 T >=16. <=22.
+		for(iClust=0;iClust<nGemCluster;iClust++) {
+		    if(GemCluster1d_plane[iClust] == TRKA &&  GemCluster1d_view[iClust] == 1 && GemCluster1d_q[iClust]>QCut && GemCluster1d_y[iClust]>=-15. &&   GemCluster1d_y[iClust]<=-5.) {
+		      
+		      resY = 0.;
+		      //3 tracciatori
+		      resY =  TRKAfResY(idTRKB_1 , idTRKC_1, idTRKD_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &dispY_trkB,&dispY_trkC,&dispY_trkD);
+		     
+
+		      trkA_resY->Fill(resY);
+		    }
+		    
+		    if(GemCluster1d_plane[iClust] == TRKB &&  GemCluster1d_view[iClust] == 1 && GemCluster1d_q[iClust]>QCut && GemCluster1d_y[iClust]>=-15. &&   GemCluster1d_y[iClust]<=-5.) {
+		      resY = 0.;
+		      //3 tracciatori
+		      resY =  TRKBfResY(idTRKA_1 , idTRKC_1, idTRKD_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &dispY_trkA,&dispY_trkC,&dispY_trkD);
+		      trkB_resY->Fill(resY);
+		      trkB_Chi2->Fill(Chi2Y);
+		    }
+
+		    if(GemCluster1d_plane[iClust] == TRKC &&  GemCluster1d_view[iClust] == 1 && GemCluster1d_q[iClust]>QCut && GemCluster1d_y[iClust]>=16. &&   GemCluster1d_y[iClust]<=22.) {
+		      resY = 0.;
+		      //3 tracciatori
+		      resY =  TRKCfResY(idTRKA_1 , idTRKB_1, idTRKD_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &dispY_trkA,&dispY_trkB,&dispY_trkD);
+		      trkC_resY->Fill(resY);
+		    }
+
+		     if(GemCluster1d_plane[iClust] == TRKD &&  GemCluster1d_view[iClust] == 1 && GemCluster1d_q[iClust]>QCut && GemCluster1d_y[iClust]>=16. &&   GemCluster1d_y[iClust]<=22.) {
+		      resY = 0.;
+		      //3 tracciatori
+		      resY =  TRKDfResY(idTRKA_1 , idTRKB_1, idTRKC_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &dispY_trkA,&dispY_trkB,&dispY_trkC);
+		      trkD_resY->Fill(resY);
+		      }
+
+		}
+		
+		
+		//Provo a mettere la TEST nel fit con le 3 camere di Tracking
+		W1resY=W1fResY(idTRKA_1, idTRKB_1 , idWELL_1, idTRKD_1, idTEST_1, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &WELLChi2Y, &W1dispY_trkA, &W1dispY_trkB, &W1dispY_WELL,&W1dispY_trkD);		
+		WELLresY_trkA->Fill(W1dispY_trkA);
+		WELLresY_trkB->Fill(W1dispY_trkB);
+		WELLresY_test->Fill(W1dispY_WELL);
+		WELLresY_trkD->Fill(W1dispY_trkD);		
+	
+
+		
+		
+		//WELL PART
+		if (NWELL_1 > 0) numClustWELLY->Fill(NWELL_1);
+		
+		
+		if(NWELL_1 >= 1){
+		
+		  nWELLAllClusterInY = nWELLAllClusterExtraY = 0;			
+		  
+		  for(iClust=0;iClust<nGemCluster;iClust++) {
+		    if(GemCluster1d_plane[iClust] == WELL &&  GemCluster1d_view[iClust] == 1 && GemCluster1d_q[iClust]>WELLQCut) {
+		      
+		      WresY = 0.;
+		      //4 tracciatori		     
+		      //WresY =  W4fResY(idTRKA_1, idTRKB_1 , idTRKC_1, idTRKD_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &dispY_trkA, &dispY_trkB, &dispY_trkC,&dispY_trkD);
+		      //3 tracciatori
+		      WresY =  W3fResY(idTRKA_1, idTRKB_1 , idTRKC_1, idTRKD_1, iClust, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &p1, &dispY_trkA, &dispY_trkB,&dispY_trkD);
+		      
+		     		      
+		      HresY_trkA->Fill(dispY_trkA);
+		      HresY_trkB->Fill(dispY_trkB);
+		      //HresY_trkC->Fill(dispY_trkC);
+		      HresY_trkD->Fill(dispY_trkD);
+
+		      if(-1*resCut <= WresY && WresY <= resCut)  {
+			NGOODWELLY++; //Numeratore EFFICIENZA ALL CLUSTERS
+
+			if ( Chi2Y<=1. ) { //Richiedo Traccie buone
+			  nWELLAllClusterInY++; 
+			  All_cluster_size_WELL_In_Y->Fill(GemCluster1d_nHit[idWELL_1]);
+			  WELLTotHresY->Fill(WresY);
+			  WELLTotQ->Fill(GemCluster1d_q[iClust]);
+			  //WELLTotResClu->Fill(WresY,GemCluster1d_nHit[iClust]);
+			}
+		      }
+		      else {
+			nWELLAllClusterExtraY++;
+			All_cluster_size_WELL_Extra_Y->Fill(GemCluster1d_nHit[iClust]);			
+		      }
+		      WELLTotHresAllY->Fill(WresY);		     
+		      WELLTotChi2Y->Fill(Chi2Y);
+		    }  
+		  }   		    
+		  
+		  if (nWELLAllClusterInY    > 0 ) numAllClustWELLInY->Fill(nWELLAllClusterInY);
+		  if (nWELLAllClusterExtraY > 0 ) numAllClustWELLExtraY->Fill(nWELLAllClusterExtraY);
+		  
+		} //NWELL_1 >= 1)
+		
+
+		//Singolo Cluster nell'evento 
+		if(NWELL_1 == 1 && GemCluster1d_q[idWELL_1]>WELLQCut ){	  
+
+		  nWELLSingleClusterInY = nWELLSingleClusterExtraY = 0;		
+
+		  WresY = 0.;
+		  //  3 Tracciatori		  
+		  WresY = W3fResY(idTRKA_1, idTRKB_1 , idTRKC_1, idTRKD_1, idWELL_1, GemCluster1d_y , GemCluster1d_dy ,GemCluster1d_z ,GemCluster1d_dz, &Chi2Y, &p1, &dispY_trkA, &dispY_trkB, &dispY_trkD);
+		  
+		  if(-1*resCut <= WresY && WresY <= resCut)  {
+		      NGOODWELLYClust1++;	//Numerote EFFICIENZA SINGOLO CLUSTER
+
+		      if ( Chi2Y<=1.) {
+			nWELLSingleClusterInY++; 
+			Single_cluster_size_WELL_In_Y->Fill(GemCluster1d_nHit[idWELL_1]);		   
+			WELL1HresY->Fill(WresY);
+			WELL1Q->Fill(GemCluster1d_q[idWELL_1]);
+			WELL1ResY->Fill(WresY,GemCluster1d_y[idWELL_1]);
+			TRACKER_p1->Fill(p1);
+			
+			//CORREZIONE PER ROTAZIONE NEL PIANO X-Y
+			if(GemCluster1d_x[idTRKA_0]>=-30. && GemCluster1d_x[idTRKB_0]>=-30. && GemCluster1d_x[idTRKD_0]>=-30. && GemCluster1d_x[idTRKA_0]<-25. && GemCluster1d_x[idTRKB_0]<-25. && GemCluster1d_x[idTRKD_0]<-25.) {WY1->Fill(WresY); WYBeforeCor->Fill(WresY); WYAfterCor->Fill(WresY); }
+			if(GemCluster1d_x[idTRKA_0]>=-25. && GemCluster1d_x[idTRKB_0]>=-25. && GemCluster1d_x[idTRKD_0]>=-25. && GemCluster1d_x[idTRKA_0]<-20. && GemCluster1d_x[idTRKB_0]<-20. && GemCluster1d_x[idTRKD_0]<-20.) {WY2->Fill(WresY); WYBeforeCor->Fill(WresY);WY12->Fill(WresY-(0.0028*-22.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*-22.5+0.0071)); //WYAfterCor->Fill(WresY+0.0546);
+			}
+			if(GemCluster1d_x[idTRKA_0]>=-20. && GemCluster1d_x[idTRKB_0]>=-20. && GemCluster1d_x[idTRKD_0]>=-20. && GemCluster1d_x[idTRKA_0]<-15. && GemCluster1d_x[idTRKB_0]<-15. && GemCluster1d_x[idTRKD_0]<-15.) {WY3->Fill(WresY); WYBeforeCor->Fill(WresY); WY13->Fill(WresY-(0.0028*-17.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*-17.5+0.0071)); //WYAfterCor->Fill(WresY+0.0447);
+			}
+			if(GemCluster1d_x[idTRKA_0]>=-15. && GemCluster1d_x[idTRKB_0]>=-15. && GemCluster1d_x[idTRKD_0]>=-15. && GemCluster1d_x[idTRKA_0]<-10. && GemCluster1d_x[idTRKB_0]<-10. && GemCluster1d_x[idTRKD_0]<-10.) {WY4->Fill(WresY); WYBeforeCor->Fill(WresY); WY14->Fill(WresY-(0.0028*-12.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*-12.5+0.0071));//WYAfterCor->Fill(WresY+0.024);
+			} 
+			if(GemCluster1d_x[idTRKA_0]>=-10. && GemCluster1d_x[idTRKB_0]>=-10. && GemCluster1d_x[idTRKD_0]>=-10. && GemCluster1d_x[idTRKA_0]< -5. && GemCluster1d_x[idTRKB_0]< -5. && GemCluster1d_x[idTRKD_0]< -5.) {WY5->Fill(WresY); WYBeforeCor->Fill(WresY); WY15->Fill(WresY-(0.0028*-7.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*-7.5+0.0071)); //WYAfterCor->Fill(WresY+0.015);
+			} 
+			if(GemCluster1d_x[idTRKA_0]>= -5. && GemCluster1d_x[idTRKB_0]>= -5. && GemCluster1d_x[idTRKD_0]>= -5. && GemCluster1d_x[idTRKA_0]<  0. && GemCluster1d_x[idTRKB_0]<  0. && GemCluster1d_x[idTRKD_0]<  0.) {WY6->Fill(WresY); WYBeforeCor->Fill(WresY); WY16->Fill(WresY-(0.0028*-2.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*-2.5+0.0071)); //WYAfterCor->Fill(WresY-0.010);
+			} 
+			if(GemCluster1d_x[idTRKA_0]>=  0. && GemCluster1d_x[idTRKB_0]>=  0. && GemCluster1d_x[idTRKD_0]>=  0. && GemCluster1d_x[idTRKA_0]<  5. && GemCluster1d_x[idTRKB_0]<  5. && GemCluster1d_x[idTRKD_0]<  5.) {WY7->Fill(WresY); WYBeforeCor->Fill(WresY); WY17->Fill(WresY-(0.0028*2.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*2.5+0.0071)); //WYAfterCor->Fill(WresY-0.012);
+			} 
+			if(GemCluster1d_x[idTRKA_0]>=  5. && GemCluster1d_x[idTRKB_0]>=  5. && GemCluster1d_x[idTRKD_0]>=  5. && GemCluster1d_x[idTRKA_0]< 10. && GemCluster1d_x[idTRKB_0]< 10. && GemCluster1d_x[idTRKD_0]< 10.) {WY8->Fill(WresY); WYBeforeCor->Fill(WresY); WY18->Fill(WresY-(0.0028*7.5+0.0071)); WYAfterCor->Fill(WresY-(0.0028*7.5+0.0071)); //WYAfterCor->Fill(WresY-0.029);
+			}
+			//if(GemCluster1d_x[idTRKA_0]>= 10. && GemCluster1d_x[idTRKB_0]>= 10. && GemCluster1d_x[idTRKD_0]>= 10. && GemCluster1d_x[idTRKA_0]< 15. && GemCluster1d_x[idTRKB_0]< 15. && GemCluster1d_x[idTRKD_0]< 15.) {WY9->Fill(WresY); WYcorr->Fill(WresY-0.054);}
+
+		      }
+		  }
+		  else {
+		    nWELLSingleClusterExtraY++;
+		    Single_cluster_size_WELL_Extra_Y->Fill(GemCluster1d_nHit[iClust]);			
+		  }
+		  WELL1HresAllY->Fill(WresY);
+		  WELL1Chi2Y->Fill(Chi2Y);
+		  
+		  if (nWELLSingleClusterInY    > 0 ) numSingleClustWELLInY->Fill(nWELLSingleClusterInY);
+		  if (nWELLSingleClusterExtraY > 0 ) numSingleClustWELLExtraY->Fill(nWELLSingleClusterExtraY);
+		
+		} //If singolo cluster
+		
+					
+		
+	} //(NTRKA_0 == 1 && NTRKA_1 == 1 && NTRKB_0 == 1 && NTRKB_1 == 1 && NTRKC_0 == 1 && NTRKC_1 >= 0 && NTRKD_0 == 1 && NTRKD_1 == 1)
+	
+	Event++;
+	return kTRUE;
+	}
+}
+
+void anaSelector::SlaveTerminate()
+{
+	
+}
+
+void anaSelector::Terminate(TString inFile)
+{
+	cout << "Terminate selector ... " << endl;
+	
+	cout << "Processed events: " << Event << endl;
+	
+	cout << "Number of Good Events:  "<< NGOOD << endl;
+	cout << "Number of Good Event of WELL detector " << NGOODWELL << endl;
+	cout << "Geometrical Efficiency " << (float) 100*NGOODWELL/NGOOD << endl; 
+	cout << "Efficiency  Y-Strips WELL Chamber with 1 or more Clusters:  " << (100.*NGOODWELLY)/NGOOD << " +- " << 1/sqrt(NGOOD)*100 << endl;
+	//cout << "Efficiency  Y-Strips within 3 Sigma WELL Chamber: " << (100.*nGOODWELLmin3sY)/NGOOD <<" %" << endl;
+	cout << "Efficiency  Y-Strips WELL Chamber with 1 Cluster         :  " << (100.*(NGOODWELLYClust1)/NGOOD )<< " +- " << 100.*sqrt( (NGOODWELLYClust1) / (NGOOD) ) << endl;
+	cout << "HHHH " << NGOODWELLY << " " << NGOODWELLYClust1 << "  " << NGOOD << endl;  
+	
+
+
+	numClustWELLY->Write();
+	
+	//WELL All Clusters
+	WELLTotHresY->Write();
+	WELLTotHresAllY->Write();
+	WELLTotQ->Write();
+	WELLTotChi2Y->Write();
+	All_cluster_size_WELL_In_Y->Write();
+	All_cluster_size_WELL_Extra_Y->Write();
+	numAllClustWELLInY->Write();
+	numAllClustWELLExtraY->Write();
+	
+	//WELL Single Cluster
+	WELL1HresY->Write();
+	WELL1HresAllY->Write();
+	WELL1Q->Write();
+	WELL1Chi2Y->Write();
+	Single_cluster_size_WELL_In_Y->Write();
+	Single_cluster_size_WELL_Extra_Y->Write();
+	TRACKER_p1->Write();
+	/*numSingleClustWELLInY->Write();
+	  numSingleClustWELLExtraY->Write();*/
+
+	WELL1ResY->Write();
+	
+
+	WY1->Write();	
+	WY2->Write();	
+	WY3->Write();	
+	WY4->Write();	
+	WY5->Write();	
+	WY6->Write();	
+	WY7->Write();	
+	WY8->Write();	
+	//	WY9->Write();
+	WY11->Write();	
+	WY12->Write();	
+	WY13->Write();	
+	WY14->Write();	
+	WY15->Write();	
+	WY16->Write();	
+	WY17->Write();	
+	WY18->Write();	
+
+	WYAfterCor->Write();
+	WYBeforeCor->Write();
+	
+	
+	/*WELLresY_trkA->Write();
+	WELLresY_trkB->Write();
+	WELLresY_test->Write();	
+	WELLresY_trkD->Write();*/
+
+
+	// TRACKERS
+	HresY_trkA->Write();
+	HresY_trkB->Write();
+	HresY_trkC->Write();
+	HresY_trkD->Write();
+	
+	cluster_size_trkA_Y->Write();
+	cluster_size_trkB_Y->Write();
+	cluster_size_trkC_Y->Write();
+	cluster_size_trkD_Y->Write();
+	
+	trkA_resY->Write();
+	trkB_resY->Write();
+	trkC_resY->Write();
+	trkD_resY->Write();
+	trkB_Chi2->Write();
+	
+	myfile->Write();
+	myfile->Close();
+}
+
+
+
+
+double fResY(int trkA, int trkB, int trC, int trkD, int test, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2, float *dispY_trkA, float *dispY_trkB,float *dispY_trkD) {
+	
+	double y[3],z[3],dy[3],dz[3];
+	double yfit, dispY;
+	double A_ZY,B_ZY,C_ZY;
+	int n=3;
+	
+	TGraphErrors *plotZY;
+	//TF1 *fitZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	
+	dispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+	
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+	
+	y[2]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[2] = GemCluster1d_dy[trkD];
+	z[2]  = GemCluster1d_z[trkD];
+	dz[2] = GemCluster1d_dz[trkD];
+	
+	//cout << y[0] << "    " << z[0] << "    " <<  y[1] << "    " << z[1] << "    " << y[2] << "    " << z[2]  << endl;
+	
+	
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	
+	//	plotZY->Fit("pol1","Q");
+	plotZY->Fit(fitZY,"Q");
+	
+	//	fitZY = plotZY->GetFunction(fitZY);
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);
+	
+	
+	//cout << A_ZY << "  " << B_ZY << "  " << C_ZY << endl;
+	
+	yfit = A_ZY + (GemCluster1d_z[test]*B_ZY);
+	dispY = (yfit - (GemCluster1d_y[test] + tiltY_TEST));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*dispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*dispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+
+	/*yfit = A_ZY + (GemCluster1d_z[WELL]*B_ZY);
+	 *dispY_WELL = (yfit - (GemCluster1d_y[WELL] + tiltY_WELL));*/
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*dispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*Chi2 = (double) (fitZY->GetChisquare());
+	
+	//plotZY->~TGraphErrors() ;
+	//fitZY->~TF1();
+	
+	
+	return dispY;
+	
+}
+
+//4Tracciatori
+double W4fResY(int trkA, int trkB, int trkC, int trkD, int WELL, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *WChi2, float *WdispY_trkA, float *WdispY_trkB,float *WdispY_trkC,float *WdispY_trkD) {
+
+        int n=4;
+        double y[4],z[4],dy[4],dz[4];
+       
+	double yfit, WdispY;
+	double A_ZY,B_ZY,C_ZY,D_ZY,E_ZY;
+	double resmin,res,WdispYmin,temp,WChi2temp,WdispY_trkA_temp,WdispY_trkB_temp,WdispY_trkD_temp;
+	//bool sign;
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	
+	
+	resmin=100000.;
+	WdispYmin=0;
+	
+	//for (int i=0;i<=10; i++){
+	
+	WdispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+	
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+	
+	y[2]  = GemCluster1d_y[trkC] + tiltY_TRKC;
+	dy[2] = GemCluster1d_dy[trkC];
+	z[2]  = GemCluster1d_z[trkC];
+	dz[2] = GemCluster1d_dz[trkC];
+
+	y[3]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[3] = GemCluster1d_dy[trkD];
+	z[3]  = GemCluster1d_z[trkD];
+	dz[3] = GemCluster1d_dz[trkD];
+	
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);
+	C_ZY = fitZY -> GetParameter(2);
+	D_ZY = fitZY -> GetParameter(3);
+	E_ZY = fitZY -> GetParameter(4);
+	
+	
+	
+	yfit = A_ZY + (GemCluster1d_z[WELL]*B_ZY);
+	//yfit = A_ZY + (GemCluster1d_z[WELL]*B_ZY)+ (GemCluster1d_z[WELL]*GemCluster1d_z[WELL]*C_ZY);
+	WdispY = (yfit - (GemCluster1d_y[WELL] + tiltY_WELL));
+	/*res=abs (WdispY);
+	  cout << WdispY << endl;*/
+	
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*WdispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	//WdispY_trkA_temp = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*WdispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	//WdispY_trkB_temp = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	
+
+	/*yfit = A_ZY + (GemCluster1d_z[trkC]*B_ZY);
+	 *WdispY_trkC = (yfit - (GemCluster1d_y[trkC] + tiltY_TRKC));*/
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*WdispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	//WdispY_trkD_temp = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*WChi2 = (double) (fitZY->GetChisquare());
+	
+	/*WChi2temp = (double) (fitZY->GetChisquare());
+	cout << "Chi2 " << 	WChi2temp << endl;
+	temp=A_ZY-5.+i*0.2;
+	fitZY->FixParameter(0, temp);
+
+	
+	if (res< resmin) {
+	  resmin=res;
+	  WdispYmin=WdispY;
+	  *WdispY_trkA = WdispY_trkA_temp;
+	  *WdispY_trkB = WdispY_trkB_temp;
+	  *WdispY_trkD = WdispY_trkD_temp;
+	  *WChi2=WChi2temp;
+	
+	  }
+	} //ciclo for 
+	WdispY=WdispYmin;
+	cout << " residuo minimo " << resmin << " WdispYmin " << WdispYmin << " Chi2 Min " <<  *WChi2 << endl;*/
+	
+
+	//*WChi2 = (double) (fitZY->GetParameter(0));
+
+	/*if ( WdispY >= 0.024 && WdispY <=0.034) {
+	  cout << WdispY << "  " << (GemCluster1d_y[WELL]) <<  endl;
+	  }*/
+
+	
+	
+	return WdispY;
+}
+
+//3Tracciatori
+double W3fResY(int trkA, int trkB, int trkC, int trkD, int WELL, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *WChi2, double *p1,float *WdispY_trkA, float *WdispY_trkB,float *WdispY_trkD) {
+
+        int n=3;
+        double y[3],z[3],dy[3],dz[3];
+       
+	double yfit, WdispY;
+	double A_ZY,B_ZY;
+	
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	
+	
+	
+	WdispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+	
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+	
+	
+	y[2]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[2] = GemCluster1d_dy[trkD];
+	z[2]  = GemCluster1d_z[trkD];
+	dz[2] = GemCluster1d_dz[trkD];
+	
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);	
+	//cout << B_ZY << endl;
+	yfit = A_ZY + (GemCluster1d_z[WELL]*B_ZY);
+	WdispY = (yfit - (GemCluster1d_y[WELL] + tiltY_WELL));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*WdispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*WdispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*WdispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*WChi2 = (double) (fitZY->GetChisquare());
+	*p1= (double) (B_ZY);
+
+	return WdispY;
+}
+
+
+
+double W1fResY(int trkA, int trkB, int WELL, int trkD, int test, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *WChi2, float *W1dispY_trkA, float *W1dispY_trkB, float *W1dispY_WELL, float *W1dispY_trkD) {	
+        double y[4],z[4],dy[4],dz[4];
+	int n=4;
+	double yfit, W1dispY;
+	double A_ZY,B_ZY,C_ZY;
+	
+	
+	TGraphErrors *plotZY;
+	//TF1 *fitZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",0.,1000);
+	
+	W1dispY=0.;
+
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+	
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+	
+	y[2]  = GemCluster1d_y[WELL] +0. ;
+	dy[2] = GemCluster1d_dy[WELL];
+	z[2]  = GemCluster1d_z[WELL];
+	dz[2] = GemCluster1d_dz[WELL];
+	
+	y[3]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[3] = GemCluster1d_dy[trkD];
+	z[3]  = GemCluster1d_z[trkD];
+	dz[3] = GemCluster1d_dz[trkD];
+
+	
+	
+	//cout << y[0] << "    " << z[0] << "    " <<  y[1] << "    " << z[1] << "    " << y[2] << "    " << z[2]  << endl;
+	//cout << y[0] << "," << y[1] << "," << y[2] << endl;
+	//cout << z[0] << "," << z[1] << "," << z[2] << endl;
+
+	
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	
+	//	plotZY->Fit("pol1","Q");
+	plotZY->Fit(fitZY,"Q");//Q
+	
+	//	fitZY = plotZY->GetFunction(fitZY);
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);
+	
+	
+	//cout << A_ZY << "  " << B_ZY << "  " << C_ZY << endl;
+	
+	yfit = A_ZY + (GemCluster1d_z[test]*B_ZY);
+	W1dispY = (yfit - (GemCluster1d_y[test] + tiltY_TEST));
+
+	//cout << GemCluster1d_z[WELL] << " " << yfit << " " << WdispY << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*W1dispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*W1dispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	//cout << "TRACK B " <<	*W1dispY_trkB << endl;
+		
+	yfit = A_ZY + (GemCluster1d_z[WELL]*B_ZY);
+	*W1dispY_WELL = (yfit - (GemCluster1d_y[WELL] + tiltY_WELL));
+	//cout << "WELL " <<	*W1dispY_WELL <<  " " << yfit <<endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*W1dispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*WChi2 = (double) (fitZY->GetChisquare());
+	
+	//plotZY->~TGraphErrors() ;
+	//fitZY->~TF1();
+	
+	
+	return W1dispY;
+	
+}
+
+double TRKAfResY(int trkB , int trkC, int trkD, int trkA, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkB, float *dispY_trkC, float *dispY_trkD) {
+
+        int n=3;
+        double y[3],z[3],dy[3],dz[3];
+       
+	double yfit, dispY;
+	double A_ZY,B_ZY;
+	
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	//TF1 *fitZY = new TF1("fitZY","[0] - sqrt((5e5*5e5) -( (x-[1]) *(x-[1]) ))",0,1000);
+	
+	
+	dispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[0] = GemCluster1d_dy[trkB];
+	z[0]  = GemCluster1d_z[trkB];
+	dz[0] = GemCluster1d_dz[trkB];
+
+	y[1]  = GemCluster1d_y[trkC] + tiltY_TRKC;
+	dy[1] = GemCluster1d_dy[trkC];
+	z[1]  = GemCluster1d_z[trkC];
+	dz[1] = GemCluster1d_dz[trkC];
+		
+	y[2]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[2] = GemCluster1d_dy[trkD];
+	z[2]  = GemCluster1d_z[trkD];
+	dz[2] = GemCluster1d_dz[trkD];
+	
+	//cout << y[0] << " C " <<   y[1] << " D " <<  y[2] << endl;    
+	//cout << z[0] << " C " <<   z[1] << " D " <<  z[2] << endl;    
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);	
+	
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	dispY = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	//cout << GemCluster1d_z[trkA] << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*dispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	//cout << *dispY_trkB << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkC]*B_ZY);
+	*dispY_trkC = (yfit - (GemCluster1d_y[trkC] + tiltY_TRKC));
+	//cout << *dispY_trkC << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*dispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*Chi2 = (double) (fitZY->GetChisquare());
+	
+	return dispY;
+}
+
+double TRKBfResY(int trkA , int trkC, int trkD, int trkB, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkC, float *dispY_trkD) {
+
+        int n=3;
+        double y[3],z[3],dy[3],dz[3];
+       
+	double yfit, dispY;
+	double A_ZY,B_ZY,C_ZY;
+	
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	//TF1 *fitZY = new TF1("fitZY","[0] - sqrt((5e5*500e5) -( (x-[1]) *(x-[1]) ))",0,1000);
+	
+	
+	
+	dispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+
+	y[1]  = GemCluster1d_y[trkC] + tiltY_TRKC;
+	dy[1] = GemCluster1d_dy[trkC];
+	z[1]  = GemCluster1d_z[trkC];
+	dz[1] = GemCluster1d_dz[trkC];
+		
+	y[2]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[2] = GemCluster1d_dy[trkD];
+	z[2]  = GemCluster1d_z[trkD];
+	dz[2] = GemCluster1d_dz[trkD];
+	
+	//cout << y[0] << " C " <<   y[1] << " D " <<  y[2] << endl;    
+	//cout << z[0] << " C " <<   z[1] << " D " <<  z[2] << endl;    
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);
+	C_ZY = fitZY -> GetParameter(2);
+	
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	dispY = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+
+
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*dispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	//cout << *dispY_trkB << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkC]*B_ZY);
+	*dispY_trkC = (yfit - (GemCluster1d_y[trkC] + tiltY_TRKC));
+	//cout << *dispY_trkC << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*dispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*Chi2 = (double) (fitZY->GetChisquare());
+	
+	//yfit =A_ZY - sqrt(( 5e5*5e5) - ( (GemCluster1d_z[trkB]-B_ZY)*(GemCluster1d_z[trkB]-B_ZY) ));
+	//dispY = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	// cout <<  A_ZY << " "  <<  B_ZY << " " << yfit << " " << (GemCluster1d_y[trkB] + tiltY_TRKB) << " "  << dispY << endl;
+
+	
+	return dispY;
+}
+
+double TRKCfResY(int trkA , int trkB, int trkD, int trkC, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkB, float *dispY_trkD) {
+
+        int n=3;
+        double y[3],z[3],dy[3],dz[3];
+       
+	double yfit, dispY;
+	double A_ZY,B_ZY;
+	
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	//TF1 *fitZY = new TF1("fitZY","[0] - sqrt((5e5*5e5) -( (x-[1]) *(x-[1]) ))",0,1000);
+	
+	
+	dispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+		
+	y[2]  = GemCluster1d_y[trkD] + tiltY_TRKD;
+	dy[2] = GemCluster1d_dy[trkD];
+	z[2]  = GemCluster1d_z[trkD];
+	dz[2] = GemCluster1d_dz[trkD];
+	
+	//cout << y[0] << " C " <<   y[1] << " D " <<  y[2] << endl;    
+	//cout << z[0] << " C " <<   z[1] << " D " <<  z[2] << endl;    
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);	
+	
+	yfit = A_ZY + (GemCluster1d_z[trkC]*B_ZY);
+	dispY = (yfit - (GemCluster1d_y[trkC] + tiltY_TRKC));
+	//cout << GemCluster1d_z[trkA] << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*dispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	//cout << *dispY_trkB << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*dispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	//cout << *dispY_trkC << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	*dispY_trkD = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	
+	*Chi2 = (double) (fitZY->GetChisquare());
+	
+	return dispY;
+}
+
+double TRKDfResY(int trkA , int trkB, int trkC, int trkD, double *GemCluster1d_y, double *GemCluster1d_dy, double *GemCluster1d_z, double *GemCluster1d_dz, double *Chi2,float *dispY_trkA, float *dispY_trkB, float *dispY_trkC) {
+
+        int n=3;
+        double y[3],z[3],dy[3],dz[3];
+       
+	double yfit, dispY;
+	double A_ZY,B_ZY;
+	
+
+	TGraphErrors *plotZY;
+	TF1 *fitZY = new TF1("fitZY","[0]+[1]*x",-1000,1000);
+	//TF1 *fitZY = new TF1("fitZY","[0] - sqrt((5e5*5e5) -( (x-[1]) *(x-[1]) ))",0,1000);
+	
+	
+	dispY=0.;
+	
+	y[0]  = GemCluster1d_y[trkA] + tiltY_TRKA;
+	dy[0] = GemCluster1d_dy[trkA];
+	z[0]  = GemCluster1d_z[trkA];
+	dz[0] = GemCluster1d_dz[trkA];
+
+	y[1]  = GemCluster1d_y[trkB] + tiltY_TRKB;
+	dy[1] = GemCluster1d_dy[trkB];
+	z[1]  = GemCluster1d_z[trkB];
+	dz[1] = GemCluster1d_dz[trkB];
+		
+	y[2]  = GemCluster1d_y[trkC] + tiltY_TRKC;
+	dy[2] = GemCluster1d_dy[trkC];
+	z[2]  = GemCluster1d_z[trkC];
+	dz[2] = GemCluster1d_dz[trkC];
+	
+	//cout << y[0] << " C " <<   y[1] << " D " <<  y[2] << endl;    
+	//cout << z[0] << " C " <<   z[1] << " D " <<  z[2] << endl;    
+
+	plotZY = new TGraphErrors(n,z,y,dz,dy);
+	plotZY->Fit(fitZY,"Q");
+	
+	A_ZY = fitZY -> GetParameter(0);
+	B_ZY = fitZY -> GetParameter(1);	
+	
+	yfit = A_ZY + (GemCluster1d_z[trkD]*B_ZY);
+	dispY = (yfit - (GemCluster1d_y[trkD] + tiltY_TRKD));
+	//cout << GemCluster1d_z[trkA] << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkA]*B_ZY);
+	*dispY_trkA = (yfit - (GemCluster1d_y[trkA] + tiltY_TRKA));
+	//cout << *dispY_trkB << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkB]*B_ZY);
+	*dispY_trkB = (yfit - (GemCluster1d_y[trkB] + tiltY_TRKB));
+	//cout << *dispY_trkC << endl;
+
+	yfit = A_ZY + (GemCluster1d_z[trkC]*B_ZY);
+	*dispY_trkC = (yfit - (GemCluster1d_y[trkC] + tiltY_TRKC));
+	
+	*Chi2 = (double) (fitZY->GetChisquare());
+	
+	return dispY;
+}
+

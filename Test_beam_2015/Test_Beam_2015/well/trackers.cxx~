@@ -1,0 +1,93 @@
+{
+
+
+TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  //hipStyle->SetOptStat(10);
+  hipStyle->SetOptStat(1);
+
+  //TFile *hfile = new TFile("ana_rec_run_-1T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-08T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-05T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-04T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-03T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-02T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-01T.root");
+  TFile *hfile = new TFile("rec_run_0T.root");
+  //TFile *hfile = new TFile("ana_rec_run_01T.root");
+  //TFile *hfile = new TFile("ana_rec_run_02T.root");
+  //TFile *hfile = new TFile("ana_rec_run_03T.root");
+  //TFile *hfile = new TFile("ana_rec_run_04T.root");
+  //TFile *hfile = new TFile("ana_rec_run_05T.root");
+  //TFile *hfile = new TFile("ana_rec_run_1T.root");
+  //TFile *hfile = new TFile("ana_rec_run_V400.root");
+  //TFile *hfile = new TFile("ana_rec_run_V380.root");
+  //TFile *hfile = new TFile("ana_rec_run_V360.root");
+  //TFile *hfile = new TFile("ana_rec_run_V350.root");
+  //TFile *hfile = new TFile("ana_rec_run_V340.root");
+  //TFile *hfile = new TFile("ana_rec_run_V320.root");
+  //TFile *hfile = new TFile("ana_rec_run_V300.root");
+
+  double medio    = 0.;
+  double rms      = 0.;
+  double errmedio = 0.;
+  double errrms   = 0.;
+
+  //  double par[2];
+
+  double mean[4]     = 0.;
+  double sigma[4]    = 0.;
+  double errmean[4]  = 0.;
+  double errsigma[4] = 0.;
+
+  TF1 *G2 = new TF1 ("G2","gaus",-2.0,2.0);
+  G2->SetLineColor(2);
+ 
+  c1 = new TCanvas("c1","Charge Cluster Trackers - X-View");
+  c1->Divide(2,2);
+  
+  c1_1->cd();
+  t1->Draw("GemCluster1d_q","GemCluster1d_plane==0 && GemCluster1d_view==0");
+
+  c1_2->cd();
+  t1->Draw("GemCluster1d_q","GemCluster1d_plane==1 && GemCluster1d_view==0");
+
+  
+  c1_3->cd();
+  t1->Draw("GemCluster1d_q","GemCluster1d_plane==5 && GemCluster1d_view==0");
+
+  
+  c1_4->cd();
+  t1->Draw("GemCluster1d_q","GemCluster1d_plane==6 && GemCluster1d_view==0");
+
+  
+
+
+}

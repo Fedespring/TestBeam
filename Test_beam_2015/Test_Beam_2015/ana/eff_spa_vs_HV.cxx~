@@ -1,0 +1,181 @@
+{
+  gROOT->Reset();
+   TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.06);
+  hipStyle->SetTitleYSize(0.06);
+  //hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.04,"y");
+  hipStyle->SetTitleOffset(0.75,"y");
+
+  gROOT->SetStyle("clearRetro");
+
+
+  const Int_t n=7;  
+  Float_t alleff[n]={0.986,0.990,0.994,0.957,0.919,0.637,0.238};
+  Float_t erralleff[n]={0.025,0.010,0.022,0.035,0.025,0.027,0.019};
+  Float_t singleff[n]={0.976,0.975,0.967,0.937,0.894,0.620,0.231};
+  Float_t errsingleff[n]={0.0038,0.0016,0.0039,0.0085,0.0077,0.0131,0.0080};
+
+  Float_t ten[n]={400,380,360,350,340,320,300};
+  Float_t errten[n]={0.*n};
+
+  Float_t allresidual[n]={110,104,108,115,160,197,231};
+  Float_t errallresidual[n]={3,1,2,4,5,7,10};
+  Float_t singleresidual[n]={109,103,107,114,156,197,227};
+  Float_t errsingleresidual[n]={3,1,2,4,5,7,10};
+
+  Float_t ten[n]={400,380,360,350,340,320,300};
+  Float_t errten[n]={0.*n};
+
+  Float_t residualtracker[n]={222,211,206,237,344,408,417};
+  Float_t erresidualtracker[n]={27,10,19,37,56,66,37};
+
+  Float_t sigmacorr[n]={25,25,25,25,25,25,25};
+  Float_t errsigmacorr[n]={1.,1.,1.,1.,1.,1.,1.};
+
+  Float_t sigmatrk[n]={0.*n};
+  Float_t errsigmatrk[n]={0.*n};
+  Float_t sigmafit[n]={0.*n};
+  Float_t errsigmafit[n]={0.*n};
+  Float_t allspatialres[n]={0.*n};
+  Float_t errallspatialres[n]={0.*n};
+  Float_t singlespatialres[n]={0.*n};
+  Float_t errsinglespatialres[n]={0.*n};
+
+  for (int i=0;i<7; i++) {
+    sigmatrk[i]=residualtracker[i]/sqrt(4);
+    errsigmatrk[i]=sqrt(4*(erresidualtracker[i]/5)**2)/sqrt(4);
+
+    sigmafit[i]=sigmatrk[i]/(sqrt(3));
+    errsigmafit[i]=sqrt(3*errsigmatrk[i]**2)/sqrt(3);
+
+    //sigmafit[i]=residualtracker[i]/3;
+    //errsigmafit[i]=erresidualtracker[i]/3;
+    allspatialres[i]=sqrt( (allresidual[i]**2) - (sigmafit[i]**2) - (sigmacorr[i]**2) );
+    errallspatialres[i]= sqrt( (errallresidual[i]**2) + (errsigmafit[i]**2)+ (errsigmacorr[i]**2));
+
+    singlespatialres[i]=sqrt( (singleresidual[i]**2) - (sigmafit[i]**2) -(sigmacorr[i]**2) );
+    errsinglespatialres[i]= sqrt( (errsingleresidual[i]**2) + (errsigmafit[i]**2)+(errsigmacorr[i]**2) );
+    
+    cout << "HV " << ten[i] << endl;
+    cout << "Average TRK Residual               " << residualtracker[i] << " +- " << erresidualtracker[i] << endl;
+    cout << "Average TRK Spatial Resolution     " << (int) sigmatrk[i]        << " +- " << (int) errsigmatrk[i] << endl;
+    cout << "Sigma of the Fit with 3-TRACKERS   " << (int) sigmafit[i]        << " +- " << (int) errsigmafit[i] << endl;
+    cout << " " << endl;
+    cout << "micro-RWELL Spatial Resolution All " << (int) allspatialres[i]      << " +- " << (int) errallspatialres[i] << endl;
+     cout << "micro-RWELL Spatial Resolution 1  " << (int) singlespatialres[i]      << " +- " << (int) errsinglespatialres[i] << endl;
+    cout << " ***********************************************************" << endl;
+
+    }
+
+  c1 = new TCanvas();
+  //c1->SetGridx();
+  //c1->SetGridy();
+  //c1->SetLogy();
+  TPad *pad = new TPad("pad","",0,0,1,1);
+  pad->SetFillColor(0);
+  pad->SetGrid();
+  pad->Draw();
+  pad->cd();
+
+   TH1F *hr = c1->DrawFrame(280.,0.2.,420.,1.02);
+  hr->SetYTitle("Efficiency");
+  hr->SetXTitle("#DeltaV_{#mu-RWELL} (V)");
+  //hr->SetLogy();
+  hr->SetTitleFont(102);
+  //hr->SetTitleSize(0.07);
+  hr->SetTitleOffset(0.75);
+  hr->SetLabelFont(102);
+  hr->SetLabelSize(0.05);
+  hr->SetLabelOffset(0);
+
+  TGraphErrors *gr2 = new TGraphErrors(n,ten,singleff,errten,errsingleff);
+  gr2->SetMarkerStyle(20);  
+  gr2->SetMarkerSize(1.0);
+  gr2->SetMarkerColor(1);
+  gr2->SetLineColor(1);
+  gr2->SetLineWidth(1);
+  gr2->Draw("PL");
+
+  //create a transparent pad drawn on top of the main pad
+  c1->cd();
+  TPad *overlay = new TPad("overlay","",0,0,1,1);
+  overlay->SetFillStyle(4000);
+  overlay->SetFillColor(0);
+  overlay->SetFrameFillStyle(4000);
+  //overlay->SetLogx();
+  overlay->Draw("");
+  overlay->cd();
+
+
+  //TGraphErrors *gr1 = new TGraphErrors(n,ten,singlespatialres,errten,errsinglespatialres);
+
+  // gr1 = new TGraphErrors(n,ten,singlespatialres,errten,errsinglespatialres);
+   gr1 = new TGraphErrors(n,ten,singleresidual,errten,errsingleresidual);
+  gr1->SetMarkerStyle(20);  
+  gr1->SetMarkerSize(1.0);
+  gr1->SetMarkerColor(2);
+  gr1->SetLineColor(2);
+  gr1->SetLineWidth(1);
+  
+  Double_t xmin = pad->GetUxmin();
+  Double_t xmax = pad->GetUxmax();
+  Double_t ymin = 80;
+  Double_t ymax = 240;
+  TH1F *hframe = overlay->DrawFrame(xmin,ymin,xmax,ymax);
+  hframe->GetXaxis()->SetLabelOffset(99);
+  hframe->GetYaxis()->SetLabelOffset(99);
+  hframe->GetYaxis()->SetNdivisions(0);
+  gr1->Draw("PL");
+
+   //Draw an axis on the right side
+  TGaxis *axis = new TGaxis(xmax,ymin,xmax, ymax,ymin,ymax,510,"+L");
+   axis->SetLineColor(kRed);
+   axis->SetLabelColor(kRed);
+   axis->SetLabelSize(0.04);
+   //axis->SetTitle("Spatial Resolution (#mum)");
+   axis->SetTitle("Residual (#mum)");
+   axis->SetTitleColor(kRed);
+   axis->SetTitleSize(0.05);
+   axis->SetTitleOffset(0.9);
+   axis->Draw();
+
+   //TGaxis *axis = new TGaxis(280,200,420,200,200,16400.,510,"-G");
+   TGaxis *axis = new TGaxis(280,240,420,240,200,16400.,510,"-G");
+  axis->SetLineColor(1);
+  axis->SetTextSize(1.06);
+  axis->SetLabelColor(1);
+  //axis->SetLogy();
+  axis->SetTitle("Gain");
+  axis->SetTitleColor(1);
+  axis->SetTitleFont(102);
+  axis->SetTitleSize(0.06);
+  axis->SetTitleOffset(0.75);
+  axis->SetLabelFont(102);
+  axis->SetLabelSize(0.05);
+  axis->SetLabelOffset(0.015);
+  axis->Draw();
+
+
+}

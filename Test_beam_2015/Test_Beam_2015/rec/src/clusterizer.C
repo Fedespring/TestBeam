@@ -1,0 +1,222 @@
+#include "clusterizer.h"
+using std::cout;
+using std::endl;
+
+bool deb = false;
+//bool deb = true;
+
+void clusterizer::NewCluster(struct Hit *_GemHit, struct Cluster1d *_GemCluster1d, int Hit_id, int Clust_id) {
+// create a new cluster
+ 
+    _GemCluster1d->plane[Clust_id]=_GemHit->plane[Hit_id];
+    _GemCluster1d->view[Clust_id]=_GemHit->view[Hit_id];
+    _GemCluster1d->q[Clust_id]=_GemHit->q[Hit_id];
+    _GemCluster1d->x[Clust_id]=_GemHit->x[Hit_id];
+    _GemCluster1d->y[Clust_id]=_GemHit->y[Hit_id];
+    _GemCluster1d->z[Clust_id]=_GemHit->z[Hit_id];
+    _GemCluster1d->dz[Clust_id]=Dz;
+    _GemCluster1d->isGood[Clust_id]=true;
+
+    if(_GemCluster1d->y[Clust_id]==-9999) {
+        _GemCluster1d->dx[Clust_id]=pitch/sqrt(12);
+        _GemCluster1d->dy[Clust_id]=-9999;
+    }
+    if(_GemCluster1d->x[Clust_id]==-9999) {
+        _GemCluster1d->dy[Clust_id]=pitch/sqrt(12);
+        _GemCluster1d->dx[Clust_id]=-9999;
+    }
+
+    _GemCluster1d->nHit[Clust_id]=1; //è il 1° hit
+    _GemCluster1d->HitIndex[Clust_id][0]=Hit_id; //nHit[]-1 !
+    
+    //deb = _GemCluster1d->plane[Clust_id]==4;
+    if (deb) {
+        cout<<"*************************"<<endl
+            <<"NewCluster created"<<endl
+            <<"Cluster_id "<<Clust_id<<" Hit_id "<<Hit_id<<endl
+            <<"Plane "<<_GemCluster1d->plane[Clust_id]<<endl
+            <<"View_Cl "<<_GemCluster1d->plane[Clust_id]<<endl
+            <<"View_Hit "<<_GemHit->view[Hit_id]<<endl
+            <<"X_Cl "<<_GemCluster1d->x[Clust_id]<<endl
+            <<"Y_Cl "<<_GemCluster1d->y[Clust_id]<<endl
+            <<"X_Hit "<<_GemHit->x[Hit_id]<<endl
+            <<"Y_Hit "<<_GemHit->y[Hit_id]<<endl
+            <<"Z "<<_GemCluster1d->z[Clust_id]<<endl
+            <<"dX "<<_GemCluster1d->dx[Clust_id]<<endl
+            <<"dY "<<_GemCluster1d->dy[Clust_id]<<endl
+            <<"dZ "<<_GemCluster1d->dz[Clust_id]<<endl
+            <<"Q "<<_GemCluster1d->q[Clust_id]<<endl
+	    <<"strip "<< _GemHit->strip[Hit_id]<<endl;
+   }
+} 
+
+void clusterizer::AddHit(struct Hit *_GemHit, struct Cluster1d *_GemCluster1d, int Hit_id, int Clust_id) {
+    // append one hit to an existing cluster
+    
+    _GemCluster1d->q[Clust_id]+=_GemHit->q[Hit_id];
+    _GemCluster1d->nHit[Clust_id]++;
+    _GemCluster1d->HitIndex[Clust_id][_GemCluster1d->nHit[Clust_id]-1]=Hit_id; //nHit[]-1 !
+   
+
+    //deb = _GemCluster1d->plane[Clust_id]==4;
+    if (deb) {
+        cout<<"*************************"<<endl
+            <<"Add an hit to the cluster"<<endl
+            <<"Cluster_id "<<Clust_id<<" Hit_id "<<Hit_id<<endl
+            <<"Plane "<<_GemHit->plane[Hit_id]<<endl
+            <<"View "<<_GemHit->view[Hit_id]<<endl
+            <<"X "<<_GemHit->x[Hit_id]<<endl
+            <<"Y "<<_GemHit->y[Hit_id]<<endl
+            <<"Z "<<_GemHit->z[Hit_id]<<endl
+            <<"Qhit "<<_GemHit->q[Hit_id]<<endl
+            <<"Qcl "<<_GemCluster1d->q[Clust_id]<<endl
+            <<"nHits "<<_GemCluster1d->nHit[Clust_id]<<endl
+	    <<"strip "<< _GemHit->strip[Hit_id]<<endl;
+    }
+}
+void clusterizer::Finalize(struct Hit *_GemHit, struct Cluster1d *_GemCluster1d, int Clust_id) {
+// finalize the cluster when there are no new hits to append
+    
+    int id,i;
+    //isGood?
+    if (_GemCluster1d->nHit[Clust_id]<3 && _GemCluster1d->q[Clust_id] < -Qoffset && _GemCluster1d->plane[Clust_id]!=4) _GemCluster1d->isGood[Clust_id]=false;
+    if (_GemCluster1d->nHit[Clust_id]<3 && _GemCluster1d->q[Clust_id] < -QoffsetBenc && _GemCluster1d->plane[Clust_id]==4) _GemCluster1d->isGood[Clust_id]=false;
+    if (_GemCluster1d->nHit[Clust_id]>MaxHitPerCluster) _GemCluster1d->isGood[Clust_id]=false;
+    //x&y 
+    if (_GemCluster1d->nHit[Clust_id]!=1) {
+        double tmp1=0, tmp2=0;
+        for(i=0;i<_GemCluster1d->nHit[Clust_id];i++) {
+            id = _GemCluster1d->HitIndex[Clust_id][i];
+            if (_GemCluster1d->view[Clust_id] == 0) tmp1 += _GemHit->x[id]*_GemHit->q[id];
+            if (_GemCluster1d->view[Clust_id] == 1) tmp1 += _GemHit->y[id]*_GemHit->q[id];
+        }
+      
+        tmp1 /= _GemCluster1d->q[Clust_id];
+        for(i=0;i<_GemCluster1d->nHit[Clust_id];i++) {
+            id = _GemCluster1d->HitIndex[Clust_id][i];
+            if (_GemCluster1d->view[Clust_id] == 0) tmp2 += (_GemHit->x[id]-tmp1)*(_GemHit->x[id]-tmp1)*_GemHit->q[id];
+            if (_GemCluster1d->view[Clust_id] == 1) tmp2 += (_GemHit->y[id]-tmp1)*(_GemHit->y[id]-tmp1)*_GemHit->q[id];
+        }
+      
+        tmp2 /= _GemCluster1d->q[Clust_id];
+
+        if (_GemCluster1d->view[Clust_id] == 0) {
+            _GemCluster1d->x[Clust_id]=tmp1;
+            _GemCluster1d->dx[Clust_id]=tmp2;
+        }
+        if (_GemCluster1d->view[Clust_id] == 1) {
+            _GemCluster1d->y[Clust_id]=tmp1;
+            _GemCluster1d->dy[Clust_id]=tmp2;
+        }
+    }
+    
+    //deb = _GemCluster1d->plane[Clust_id]==4;
+    if (deb) {
+        cout<<"*************************"<<endl
+            <<"Cluster finalized"<<endl
+            <<"Cluster_id "<<Clust_id<<endl
+            <<"X " <<_GemCluster1d->x[Clust_id]<<endl
+            <<"Y " <<_GemCluster1d->y[Clust_id]<<endl
+            <<"Z " <<_GemCluster1d->z[Clust_id]<<endl
+            <<"dX "<<_GemCluster1d->dx[Clust_id]<<endl
+            <<"dY "<<_GemCluster1d->dy[Clust_id]<<endl
+            <<"dZ "<<_GemCluster1d->dz[Clust_id]<<endl
+            <<"Q " <<_GemCluster1d->q[Clust_id]<<endl
+            <<"nHits "<<_GemCluster1d->nHit[Clust_id]<<endl
+            <<"Plane "<<_GemCluster1d->plane[Clust_id]<<endl
+            <<"View "<<_GemCluster1d->view[Clust_id]<<endl
+	    <<"*************************"<<endl;
+    }
+   //manca da fixxare la cordinata in Z poiche se la cameretta è obliqua allora si deve tener conto dell'angolo
+}
+
+int clusterizer::clusterize(struct Hit *_GemHit, struct Cluster1d *_GemCluster1d)  {
+//  main clusterize function that generates clusters from hits
+    
+    if (deb) cout<<"+++++++++++++++++++++++"<<endl
+                 <<"+++++++++++++++++++++++"<<endl
+                 <<"    NEW Clusterizer BEGIN"<<endl;
+
+    bool samePlane,sameView,stripClose,stripClose1,stripClose2;
+    int nCluster = 0; //Cluster Index
+    int Cl_id = 0;
+    int Hit_id = 0;
+    int nHit = _GemHit->nHit;
+    int i;
+
+    if (nHit==0) {
+        if(deb) cout<<"but no strip is fired"<<endl;
+        _GemCluster1d->nCluster = 0;
+        return 0;
+    }
+    //the first cluster is generated with the first hit
+    NewCluster(_GemHit,_GemCluster1d,Hit_id,Cl_id);
+    
+    for(i=1;i<nHit;i++) { // loop on all the hits starting from the second one
+   
+        Hit_id = i ;
+        samePlane  = (_GemHit->plane[Hit_id] == _GemHit->plane[Hit_id-1]); //same plane
+        sameView   = (_GemHit->view[Hit_id]  == _GemHit->view[Hit_id-1]); //same view
+        stripClose1 = (_GemHit->strip[Hit_id] == _GemHit->strip[Hit_id-1] + 1);// || (_GemHit->strip[Hit_id] == _GemHit->strip[Hit_id-1] + 2) ; //strips close previous
+	//cout << "Previous Strip " << _GemHit->strip[Hit_id-1] + 1 << " Hit_id " << Hit_id << endl;
+        stripClose2 = (_GemHit->strip[Hit_id] == _GemHit->strip[Hit_id-1] - 1);// || (_GemHit->strip[Hit_id] == _GemHit->strip[Hit_id-1] - 2) ; //strips close next
+	//cout << "Next strip " << _GemHit->strip[Hit_id-1] - 1 << " Hit_id " << Hit_id << endl;
+        stripClose = ( stripClose1 || stripClose2 );
+
+
+        if (samePlane && sameView && stripClose){     // if found a neighbor hit add it to the cluster
+            AddHit(_GemHit,_GemCluster1d,Hit_id,Cl_id);
+        }
+        else {               // if no neighbor is found finalize the prev cluster and create a new one
+            Finalize(_GemHit,_GemCluster1d,Cl_id);
+            Cl_id++;
+            NewCluster(_GemHit,_GemCluster1d,Hit_id,Cl_id);
+        }
+    }  // for loop on hits
+
+    Finalize(_GemHit,_GemCluster1d,Cl_id);  // finalize last cluster
+    Cl_id++;
+    nCluster = Cl_id;
+
+    _GemCluster1d->nCluster = nCluster;
+
+    return nCluster;
+}
+
+
+int clusterizer::clusterize2d(struct Cluster1d *_GemCluster1d, struct Cluster2d *_GemCluster2d)  {
+
+    int iCluster, jCluster;
+    int nCluster2d = 0;
+    
+    for (iCluster=0;iCluster<_GemCluster1d->nCluster;iCluster++) {     // first loop over the x clusters
+        if (_GemCluster1d->view[iCluster]==0) {
+            for (jCluster=0;jCluster<_GemCluster1d->nCluster;jCluster++) {  // then loop over the y and match the plane
+                if (_GemCluster1d->view[jCluster]==1&&_GemCluster1d->plane[iCluster]==_GemCluster1d->plane[jCluster]) {
+                    // create a new 2D cluster
+                    _GemCluster2d->plane[nCluster2d] = _GemCluster1d->plane[iCluster];
+                    _GemCluster2d->q[nCluster2d] = _GemCluster1d->q[iCluster] + _GemCluster1d->q[jCluster];
+                    _GemCluster2d->qx[nCluster2d] = _GemCluster1d->q[iCluster];
+                    _GemCluster2d->qy[nCluster2d] = _GemCluster1d->q[jCluster];
+                    _GemCluster2d->x[nCluster2d] = _GemCluster1d->x[iCluster];
+                    _GemCluster2d->y[nCluster2d] = _GemCluster1d->y[jCluster];
+                    _GemCluster2d->z[nCluster2d] = _GemCluster1d->z[iCluster];
+                    _GemCluster2d->dx[nCluster2d] = _GemCluster1d->dx[iCluster];
+                    _GemCluster2d->dy[nCluster2d] = _GemCluster1d->dy[jCluster];
+                    _GemCluster2d->dz[nCluster2d] = _GemCluster1d->dz[iCluster];
+                    _GemCluster2d->ClusterIdX[nCluster2d] = iCluster;
+                    _GemCluster2d->ClusterIdY[nCluster2d] = jCluster;
+                    _GemCluster2d->nHit[nCluster2d] = _GemCluster1d->nHit[iCluster] + _GemCluster1d->nHit[jCluster];
+                    _GemCluster2d->nHitX[nCluster2d] = _GemCluster1d->nHit[iCluster];
+                    _GemCluster2d->nHitY[nCluster2d] = _GemCluster1d->nHit[jCluster];
+                    nCluster2d++;
+                }
+            }
+        }
+    }
+
+    _GemCluster2d->nCluster2d = nCluster2d;
+    
+    return nCluster2d;
+}
+

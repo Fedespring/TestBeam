@@ -1,0 +1,55 @@
+#ifndef parameters_h
+#define parameters_h
+
+#include "TString.h"
+
+const int nAPV = 14;
+const int nApvCh = 128;
+const int maxHit = nAPV*nApvCh;
+const int maxCluster1d = nAPV*nApvCh;
+const int maxCluster2d = nAPV*nApvCh;
+
+const int n_of_sigma = 3;
+const int Qoffset = -000;
+const int QoffsetBenc = -00;
+const int MaxHitPerCluster = 20;
+
+//const TString RawDir = "/Users/cibinett/Desktop/BeamTest/data/raw/";
+//const TString RecDir = "/Users/cibinett/Desktop/BeamTest/data/rec/";
+//const TString PedDir = "/Users/cibinett/Desktop/BeamTest/data/ped/";
+
+const TString RawDir = "/home/marco/Scrivania/Riccardo_H4/run/";
+const TString RecDir = "/home/marco/Scrivania/Riccardo_H4/next/";
+
+const TString PedDir = "/home/marco/Scrivania/Riccardo_H4/ped/";
+
+const float pitch = 0.65; //mm
+const float pitchBen = 0.4; //mm
+const float thickness = 1.0; //mm
+const int nStripMax = 128;
+const float Dz = 1.; // error on z position in mm
+
+
+const int APVmap[20]     = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13, 14, 15, 16, 17, 18, 19};
+const int Planemap[20]   = {0, 1, 0, 1, 5, 6, 5, 6, 3, 2,  3,  2,  3, -1,  4,  4, -1, -1, -1, -1};
+const int Viewmap[20]    = {1, 1, 0, 0, 1, 1, 0, 0, 1, 1,  2,  0,  2, -1,  1,  1, -1, -1, -1, -1};
+const int Halfmap[20]    = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0, -1,  0,  0, -1, -1, -1, -1}; 
+const int APVreadout[20] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1,  3,  1,  3, -1,  2,  2, -1, -1, -1, -1};
+
+
+
+const float Zpos[7]      = {0., 62., 3514., 3546., 3906., 7403., 7465.}; 
+
+const float AllCoeff_x[7] = {10.,0.,0.,0.,0.,-5.,0.};   // X lignment coeff for the 7 planes
+//const float AllCoeff_y[7] = {-4.23,2.66,0.,0.,-3.991,-6.14,-6.};   // Y lignment coeff for the 7 planes B=0 T
+//const float AllCoeff_y[7] = {-4.23,2.66,0.,0.,-3.991,-7.,-7};   // Y lignment coeff for the 7 planes B=0 T
+//const float AllCoeff_y[7] = {-4.23,2.66,0.,0.,3.575,-5.66,-0.};   // Y lignment coeff for the 7 planes B=1 T
+const float AllCoeff_y[7] = {0,10,0.,0.,0,-20.,-20.};   // Y lignment coeff for the 7 planes per WELL 2015
+
+
+
+const float AllCoeff_z[7] = {0.,0.,0.,0.,0.,0.,0.};   // Z lignment coeff for the 7 planes
+
+
+
+#endif

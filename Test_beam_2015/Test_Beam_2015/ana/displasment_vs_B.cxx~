@@ -1,0 +1,123 @@
+{
+  gROOT->Reset();
+   TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.06);
+  hipStyle->SetTitleYSize(0.06);
+  //hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.04,"y");
+  hipStyle->SetTitleOffset(0.75,"y");
+
+  gROOT->SetStyle("clearRetro");
+
+
+  /*const Int_t n=14;  
+  Float_t effall[n]={0.979,0.973,0.989,0.989,0.993,0.993,0.993,0.993,0.994,0.998,0.997,0.999,0.990,0.987};
+  Float_t erreffall[n]={0.010,0.020,0.011,0.015,0.014,0.011,0.015,0.010,0.015,0.015,0.015,0.015,0.011,0.010};
+  Float_t effsingle[n]={0.956,0.963,0.973,0.974,0.975,0.980,0.979,0.980,0.983,0.984,0.982,0.977,0.975,0.957}; 
+  Float_t erreffsingle[n]={0.010,0.020,0.011,0.015,0.014,0.011,0.015,0.010,0.015,0.015,0.015,0.015,0.011,0.010};
+  Float_t bfield[n]={-1,-0.8,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,1};
+  Float_t errbfield[n]={0.*n};*/
+  
+  const Int_t n=13;  
+  Float_t effall[n]={0.979,0.989,0.989,0.993,0.993,0.993,0.993,0.994,0.998,0.997,0.999,0.990,0.987};
+  Float_t erreffall[n]={0.010,0.011,0.015,0.014,0.011,0.015,0.010,0.015,0.015,0.015,0.015,0.011,0.010};
+  Float_t effsingle[n]={0.956,0.973,0.974,0.975,0.980,0.979,0.980,0.983,0.984,0.982,0.977,0.975,0.957}; 
+  Float_t erreffsingle[n]={0.010,0.011,0.015,0.014,0.011,0.015,0.010,0.015,0.015,0.015,0.015,0.011,0.010};
+  Float_t bfield[n]={-1,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,1};
+  Float_t errbfield[n]={0.*n};
+ 
+  
+
+
+
+  c1 = new TCanvas();
+  c1->SetGridx();
+  c1->SetGridy();
+
+  mg = new TMultiGraph();
+  TGraphErrors *gr1 = new TGraphErrors(n,bfield,effall,errbfield,erreffall);
+  TGraphErrors *gr2 = new TGraphErrors(n,bfield,effsingle,errbfield,erreffsingle);
+
+  mg->Add(gr1);
+  gr1->SetMarkerStyle(20);  
+  gr1->SetMarkerSize(1.0);
+  gr1->SetMarkerColor(1);
+  gr1->SetLineColor(1);
+  gr1->SetLineWidth(1);
+
+  mg->Add(gr2);
+  gr2->SetMarkerStyle(21);  
+  gr2->SetMarkerSize(1.0);
+  gr2->SetMarkerColor(2);
+  gr2->SetLineColor(1);
+  gr2->SetLineWidth(1);
+
+  
+  mg->Draw("APL");
+
+  //X axis attributes                                                           
+  mg->GetXaxis()->SetTitle("Magnetic Field (T)");
+  mg->GetXaxis()->SetTitleFont(102);
+  mg->GetXaxis()->SetTitleSize(0.06);
+  mg->GetXaxis()->SetTitleOffset(0.75);
+  mg->GetXaxis()->SetLabelFont(102);
+  mg->GetXaxis()->SetLabelSize(0.05);
+  mg->GetXaxis()->SetLabelOffset(0);
+  mg->GetXaxis()->SetLimits(-1.2,1.2);
+
+   //Y axis attributes                                                          
+  mg->GetYaxis()->SetTitle("Efficiency");
+  mg->GetYaxis()->SetTitleFont(102);
+  mg->GetYaxis()->SetTitleSize(0.06);
+  mg->GetYaxis()->SetTitleOffset(0.85);
+  mg->GetYaxis()->SetLabelFont(102);
+  mg->GetYaxis()->SetLabelSize(0.05);
+  mg->GetYaxis()->SetLabelOffset(0.004);
+  mg->GetYaxis()->SetRangeUser(0.85,1.02);
+
+  /*TGaxis *axis = new TGaxis(280,1.025,420,1.025,200,16400.,510,"-G");
+  axis->SetLineColor(1);
+  axis->SetTextSize(1.06);
+  axis->SetLabelColor(1);
+  //axis->SetLogy();
+  axis->SetTitle("Gain");
+  axis->SetTitleColor(1);
+  axis->SetTitleFont(102);
+  axis->SetTitleSize(0.06);
+  axis->SetTitleOffset(0.75);
+  axis->SetLabelFont(102);
+  axis->SetLabelSize(0.05);
+  axis->SetLabelOffset(0.015);
+  axis->Draw();*/
+  
+  l = new TLegend(0.5,0.5,0.8,0.8);
+  l->SetBorderSize(1);
+  l->SetMargin(0.15);
+  l->SetTextFont(102);
+  l->AddEntry(gr1,"#mu-RWELL 80 M#Omega/#Box - Ar:iC_{4}H_{10} - All Clusters","pl");
+  l->AddEntry(gr2,"#mu-RWELL 1 G#Omega/#Box - Ar:iC_{4}H_{10} - Single Cluster","pl");
+  
+  l->Draw();
+
+}

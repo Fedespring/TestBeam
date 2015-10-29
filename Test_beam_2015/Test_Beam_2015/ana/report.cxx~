@@ -1,0 +1,151 @@
+{
+
+
+TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  hipStyle->SetOptStat(10);
+
+
+  TFile *hfile = new TFile("ana_rec_run428.root");
+  
+  double par[6];
+  TF1 *G1 = new TF1 ("G1","gaus",-0.25,0.15);  
+  TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+
+  /*TF1 *G1 = new TF1 ("G1","gaus",-0.6,0.4);  
+    TF1 *G2 = new TF1 ("G2","gaus",-0.2,0.6);*/
+
+  TF1 *f   = new TF1 ("f","gaus(0)+gaus(3)",-1.0,1.0);
+ 
+ G1->SetLineColor(1);
+  G2->SetLineColor(3);
+  f->SetLineColor(2);
+
+  WELL2HresY->Fit(G1,"R");
+  WELL2HresY->Fit(G2,"R");
+  //WYcorr->Fit(G1,"R");
+  //WYcorr->Fit(G2,"R");
+    
+  G1->GetParameters(&par[0]);
+  G2->GetParameters(&par[3]);
+  f->SetParameters(par);
+  f->SetParName(0,"Constant");
+  f->SetParName(1,"Mean");
+  f->SetParName(2,"Sigma");
+  f->SetParName(3,"Constant");
+  f->SetParName(4,"Mean");
+  f->SetParName(5,"Sigma");
+  WELL2HresY->Fit(f,"R");
+  //WYcorr->Fit(f,"R");
+  
+
+  // 6 parameters of the fit: (p0 to p5)
+   double Ncons  = f->GetParameter(0);
+   double Gmean= f->GetParameter(1);
+   double Gwdth = f->GetParameter(2);
+   /*
+   // B= 1 T
+   c2 = new TCanvas();
+   TFile *hfile = new TFile("ana_rec_run429.root");
+   TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+   G2->SetLineColor(2);
+   WELLHresY->Fit(G2,"R");
+   // WYcorr->Fit(G2,"R","sames");
+
+   // B= -1 T
+  c3 = new TCanvas();
+  TFile *hfile = new TFile("ana_rec_run430.root");
+  TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+  G2->SetLineColor(2);
+   
+  //WELLHresY->Fit(G2,"R");
+  WYcorr->Fit(G2,"R","");
+
+  
+  //B= -0.5 T
+  c4 = new TCanvas();
+  TFile *hfile = new TFile("ana_rec_run414.root");
+  
+  double par[6];
+  TF1 *G1 = new TF1 ("G1","gaus",-0.2,0.2);
+  
+  TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+  TF1 *f   = new TF1 ("f","gaus(0)+gaus(3)",-1.0,1.0);
+  G1->SetLineColor(1);
+  G2->SetLineColor(3);
+  f->SetLineColor(2);
+  
+  WYcorr->Fit(G1,"R");
+  WYcorr->Fit(G2,"R");
+  
+  G1->GetParameters(&par[0]);
+  G2->GetParameters(&par[3]);
+  f->SetParameters(par);
+  f->SetParName(0,"Constant");
+  f->SetParName(1,"Mean");
+  f->SetParName(2,"Sigma");
+  f->SetParName(3,"Constant");
+  f->SetParName(4,"Mean");
+  f->SetParName(5,"Sigma");
+  WYcorr->Fit(f,"R");
+
+  // B= 0.5 T
+  c5 = new TCanvas();
+  //TFile *hfile = new TFile("ana_rec_run404.root");
+  TFile *hfile = new TFile("ana_rec_run405.root");
+  //TFile *hfile = new TFile("ana_rec_run399.root");
+  
+  double par[6];
+  TF1 *G1 = new TF1 ("G1","gaus",-0.3,0.3);
+  TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+  TF1 *f   = new TF1 ("f","gaus(0)+gaus(3)",-1.0,1.0);
+  G1->SetLineColor(1);
+  G2->SetLineColor(3);
+  f->SetLineColor(2);
+
+  WELLHresY->Fit(G1,"R");
+  WELLHresY->Fit(G2,"R");
+    
+  G1->GetParameters(&par[0]);
+  G2->GetParameters(&par[3]);
+  f->SetParameters(par);
+  f->SetParName(0,"Constant");
+  f->SetParName(1,"Mean");
+  f->SetParName(2,"Sigma");
+  f->SetParName(3,"Constant");
+  f->SetParName(4,"Mean");
+  f->SetParName(5,"Sigma");
+  WELLHresY->Fit(f,"R");
+  
+  /*TF1 *G2 = new TF1 ("G2","gaus",-1.0,1.0);
+  G2->SetLineColor(2);
+  WYcorr->Fit(G2,"R","");*/
+
+}

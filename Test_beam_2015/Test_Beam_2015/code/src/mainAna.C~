@@ -1,0 +1,61 @@
+#include <iostream>
+#include <fstream>
+
+#include "TChain.h"
+#include "TSystem.h"
+#include "TString.h"
+#include "TSelector.h"
+#include <TROOT.h>
+#include "anaSelector.h"
+#include "parameters.h"
+
+main(int argc, char* argv[]) {
+    
+    
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " filename.root" << std::endl;
+        return 1;
+    }
+    TString inFile = RecDir+argv[1];
+    
+    
+    std::ifstream inStream(inFile, std::ios::binary);
+    if (!inStream) {
+        std::cerr << "File " << inFile << " not found" << std::endl;
+        return 1;
+    }
+       
+    TChain ch("t1");
+    ch.Add(inFile);
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run270.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run271.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run272.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run273.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run274.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run195.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run196.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run197.root");
+    ch.Add("/Users/cibinett/Desktop/BeamTest/data/rec/rec_run198.root");
+    
+
+    anaSelector *sel = new anaSelector();
+    
+    sel->Init( (TTree* ) &ch);
+    sel->Begin((TTree* ) &ch, argv[1]);
+    long int nEntries = ch.GetEntries();
+
+    std::cout << "-------- " << nEntries << std::endl;
+    
+    for (long int i=0;i<nEntries;i++) {
+
+      //    if (i%1000==0) std::cout << "now at event " << i << std::endl;
+
+      sel->Process(i,(TTree* ) &ch);
+    }
+
+    sel->Terminate(argv[1]);
+
+    
+}
+
+

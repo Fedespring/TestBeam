@@ -1,0 +1,164 @@
+{
+
+
+TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  //hipStyle->SetOptStat(10);
+  hipStyle->SetOptStat(1);
+
+  //TFile *hfile = new TFile("ana_rec_run_-1T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-08T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-05T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-04T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-03T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-02T.root");
+  //TFile *hfile = new TFile("ana_rec_run_-01T.root");
+  //TFile *hfile = new TFile("ana_rec_run_0T.root");
+  // TFile *hfile = new TFile("ana_rec_run_01T.root");
+  //TFile *hfile = new TFile("ana_rec_run_02T.root");
+  //TFile *hfile = new TFile("ana_rec_run_03T.root");
+  //TFile *hfile = new TFile("ana_rec_run_04T.root");
+  //TFile *hfile = new TFile("ana_rec_run_05T.root");
+  TFile *hfile = new TFile("ana_rec_run_1T.root");
+  //TFile *hfile = new TFile("ana_rec_run_V400.root");
+  //TFile *hfile = new TFile("ana_rec_run_V380.root");
+  //TFile *hfile = new TFile("ana_rec_run_V360.root");
+  //TFile *hfile = new TFile("ana_rec_run_V350.root");
+  //TFile *hfile = new TFile("ana_rec_run_V340.root");
+  //TFile *hfile = new TFile("ana_rec_run_V320.root");
+  //TFile *hfile = new TFile("ana_rec_run_V300.root");
+
+  double medio    = 0.;
+  double rms      = 0.;
+  double errmedio = 0.;
+  double errrms   = 0.;
+
+  //  double par[2];
+
+  double mean[4]     = 0.;
+  double sigma[4]    = 0.;
+  double errmean[4]  = 0.;
+  double errsigma[4] = 0.;
+
+  double res[4]=0.;
+  double erres[4]=0.;
+  double ResWELL=0.;
+
+  TF1 *G2 = new TF1 ("G2","gaus",-2.0,2.0);
+  G2->SetLineColor(2);
+ 
+  c1 = new TCanvas("c1","Trackers");
+  c1->Divide(2,2);
+  
+  c1_1->cd();
+  trkA_resY->Fit(G2,"RQ");
+  mean[0]     = G2->GetParameter(1);
+  errmean[0]  = G2->GetParError(1);
+  sigma[0]    = G2->GetParameter(2);
+  errsigma[0] = G2->GetParError(2);
+
+  c1_2->cd();
+  trkB_resY->Fit(G2,"RQ");
+  mean[1]     = G2->GetParameter(1);
+  errmean[1]  = G2->GetParError(1);
+  sigma[1]    = G2->GetParameter(2);
+  errsigma[1] = G2->GetParError(2);
+
+  c1_3->cd();
+  trkC_resY->Fit(G2,"RQ");
+  mean[2]     = G2->GetParameter(1);
+  errmean[2]  = G2->GetParError(1);    
+  sigma[2]    = G2->GetParameter(2);
+  errsigma[2] = G2->GetParError(2);
+  
+  c1_4->cd();
+  trkD_resY->Fit(G2,"RQ");
+  mean[3]     = G2->GetParameter(1);
+  errmean[3]  = G2->GetParError(1);
+  sigma[3]    = G2->GetParameter(2);
+  errsigma[3] = G2->GetParError(2);
+
+
+  for (int i=0;i<=3;i++) {
+    medio= medio + mean[i];
+    errmedio= errmedio + (errmean[i]**2);
+    rms = rms +sigma[i];
+    errrms = errrms + (errsigma[i]**2);
+  }
+
+  medio=medio/4;
+  errmedio=sqrt(errmedio);
+  rms=rms/4;
+  errrms= sqrt(errrms);
+
+  cout << " " << endl;
+  cout << "Average Mean:  " << (int) (medio*1000) << " +- " << (int) (errmedio*1000) << endl;
+  cout << "Average Sigma: " << (int) (rms*1000) << " +- " <<  (int) (errrms*1000) << endl;
+  cout << " " << endl;
+  
+  //cout << "TRK3 " <<  (int) (sigma[2]*1000) << " " << (int) (errsigma[2]*1000) << endl;
+
+
+  c2 = new TCanvas("c2","Trackers");
+  c2->Divide(2,2);
+  c2_1->cd();
+  HresY_trkA->Fit(G2,"RQ");
+  res[0]    = G2->GetParameter(2);
+  erres[0] = G2->GetParError(2);
+
+  c2_2->cd();
+  HresY_trkB->Fit(G2,"RQ");
+  res[1]    = G2->GetParameter(2);
+  erres[1] = G2->GetParError(2);
+
+  c2_3->cd();
+  WELL1HresY->Fit(G2,"RQ");
+  ResWELL    = G2->GetParameter(2);
+
+  c2_4->cd();
+  HresY_trkD->Fit(G2,"RQ");
+  res[3]    = G2->GetParameter(2);
+  erres[3] = G2->GetParError(2);
+
+  
+  double fit=sqrt( res[0]**2 + res[1]**2 + res[3]**2 ) ;
+  double errfit=sqrt( erres[0]**2 + erres[1]**2 + erres[3]**2 ) ;
+  
+  cout << "Residual WELL: "<< (int) ( (ResWELL*1000) ) << endl; 
+  cout << "**************** " << endl;
+  cout << " " << endl;
+  cout << "Sigma Fit Trackers: " <<  (int) ( (rms*1000)/sqrt(8) ) << endl;
+  cout << "Spatial Resolution: " << (int) (sqrt( ((ResWELL*1000)**2) - ( ((rms*1000)/sqrt(8))**2) - 25**2) )<< endl;
+  cout << " " << endl;
+  cout << "Sigma Fit:  " << (int) (fit*1000) << " +- " <<  (float) (errfit*1000) << endl;
+  cout << "Spatial Resolution: " << (int) ( sqrt( ((ResWELL*1000)**2) - ( (fit*1000)**2) -25**2) )<< endl;
+  
+  //cout << "More: " <<  
+}

@@ -1,0 +1,171 @@
+{
+  gROOT->Reset();
+   TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.06);
+  hipStyle->SetTitleYSize(0.06);
+  //hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.04,"y");
+  hipStyle->SetTitleOffset(0.75,"y");
+
+  gROOT->SetStyle("clearRetro");
+
+  const Int_t n=14;  
+
+  Float_t residual80M[n]= {184,149,107,92,88,78,72,69,70,73,83,89,103,174};
+  //Float_t residual80M[n]= {187,149, 110, 97,89, 80,73,71, 72,76,84,91,103,174};
+  Float_t erresidual80M[n]={2, 3, 1,  2, 2, 1, 1, 1, 1, 1, 2, 2,  2,  3};
+  Float_t bfield[n]={-1,-0.8,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,1};
+  Float_t errbfield[n]={0.*n};
+  
+  Float_t residualtracker[n]={416,341,232,206,178,156,154,140,145,149,168,186,212,360};
+  //Float_t residualtracker[n]={382,297,218,198,173,141,134,131,136,146,173,185,216,365};
+  Float_t erresidualtracker[n]={13,26,12,13,13,10,11,6,9,9,10,13,10,12};
+
+  Float_t sigmacorr[n]={25,25,25,25,25,25,25,25,25,25,25,25,25,25};
+
+  Float_t errsigmacorr[n]={1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.};
+
+  Float_t sigmatrk[n]={0.*n};
+  Float_t errsigmatrk[n]={0.*n};
+  Float_t sigmafit[n]={0.*n};
+  Float_t errsigmafit[n]={0.*n};
+  Float_t spatialres[n]={0.*n};
+  Float_t errspatialres[n]={0.*n};
+ 
+
+  for (int i=0;i<14; i++) {
+    sigmatrk[i]=residualtracker[i]/sqrt(4);
+    errsigmatrk[i]=sqrt(4*(erresidualtracker[i]/5)**2)/sqrt(4);
+    
+    /*sigmatrk[i]=residualtracker[i]/sqrt(2);
+      errsigmatrk[i]=sqrt(2*(erresidualtracker[i]/2)**2)/sqrt(2);*/
+
+    sigmafit[i]=sigmatrk[i]/(sqrt(3));
+    errsigmafit[i]=sqrt(3*errsigmatrk[i]**2)/sqrt(3);
+
+    spatialres[i]=sqrt( (residual80M[i]**2) - (sigmafit[i]**2) - (sigmacorr[i]**2) );
+    //spatialres[i]=sqrt( (residual80M[i]**2) - (sigmafit[i]**2) );
+    errspatialres[i]= sqrt( (erresidual80M[i]**2) + (errsigmafit[i]**2) + (errsigmacorr[i]**2) );
+  
+    cout << "Magnetic Field " << bfield[i] << endl;
+    cout << "Average TRK Residual             " << residualtracker[i] << " +- " << erresidualtracker[i]/2 << endl;
+    cout << "Average TRK Spatial Resolution   " << (int) sigmatrk[i]        << " +- " << (int) errsigmatrk[i] << endl;
+    cout << "Sigma of the Fit with 3-TRACKERS " << (int) sigmafit[i]        << " +- " << (int) errsigmafit[i] << endl;
+    cout << " " << endl;
+    cout << "micro-RWELL Residual             " << (int) residual80M[i]     << " +- " << (int) erresidual80M[i] << endl;
+    cout << "micro-RWELL Spatial Resolution   " << (int) spatialres[i]      << " +- " << (int) errspatialres[i] << endl;
+    cout << " ***********************************************************" << endl;
+  }
+  
+  /*const Int_t m=5;
+  Float_t SimuRes[m]={91,66,48,66,91};
+  Float_t ErrSimuRes[m]={1,1,1,1,1};
+  Float_t SimuB[m]={-1,-0.5,0.,0.5,1.};
+  Float_t ErrSimuB[m]=={m*0.};*/
+
+  const Int_t m=3;
+  Float_t SimuRes[m]={91,66,48};
+  Float_t ErrSimuRes[m]={1,1,1};
+  Float_t SimuB[m]={-1,-0.5,0.};
+  Float_t ErrSimuB[m]=={m*0.};
+
+
+  c1 = new TCanvas();
+  c1->SetGridx();
+  c1->SetGridy();
+
+  mg = new TMultiGraph();
+  TGraphErrors *gr1 = new TGraphErrors(n,bfield,spatialres,errbfield,errspatialres);
+  TGraphErrors *gr2 = new TGraphErrors(m,SimuB,SimuRes,ErrSimuB,ErrSimuRes);
+
+  mg->Add(gr1);
+  gr1->SetMarkerStyle(20);  
+  gr1->SetMarkerSize(1.0);
+  gr1->SetMarkerColor(1);
+  gr1->SetLineColor(1);
+  gr1->SetLineWidth(1);
+ 
+  
+  mg->Add(gr2);
+  gr2->SetMarkerStyle(20);  
+  gr2->SetMarkerSize(0.1);
+  gr2->SetMarkerColor(2);
+  gr2->SetLineColor(2);
+  gr2->SetLineWidth(10);
+
+  mg->Draw("APC");
+
+  
+
+  //X axis attributes                                                           
+  mg->GetXaxis()->SetTitle("Magnetic Field (T)");
+  mg->GetXaxis()->SetTitleFont(102);
+  mg->GetXaxis()->SetTitleSize(0.06);
+  mg->GetXaxis()->SetTitleOffset(0.75);
+  mg->GetXaxis()->SetLabelFont(102);
+  mg->GetXaxis()->SetLabelSize(0.05);
+  mg->GetXaxis()->SetLabelOffset(0);
+  mg->GetXaxis()->SetLimits(-1.2,1.2.);
+
+   //Y axis attributes                                                          
+  mg->GetYaxis()->SetTitle("Spatial Resolution (#mum)");
+  mg->GetYaxis()->SetTitleFont(102);
+  mg->GetYaxis()->SetTitleSize(0.06);
+  mg->GetYaxis()->SetTitleOffset(0.85);
+  mg->GetYaxis()->SetLabelFont(102);
+  mg->GetYaxis()->SetLabelSize(0.05);
+  mg->GetYaxis()->SetLabelOffset(0.004);
+  mg->SetMinimum(20.);
+  mg->SetMaximum(150.);
+
+ 
+
+ 
+
+
+  /*TGaxis *axis = new TGaxis(280,1.025,420,1.025,200,16400.,510,"-G");
+  axis->SetLineColor(1);
+  axis->SetTextSize(1.06);
+  axis->SetLabelColor(1);
+  //axis->SetLogy();
+  axis->SetTitle("Gain");
+  axis->SetTitleColor(1);
+  axis->SetTitleFont(102);
+  axis->SetTitleSize(0.06);
+  axis->SetTitleOffset(0.75);
+  axis->SetLabelFont(102);
+  axis->SetLabelSize(0.05);
+  axis->SetLabelOffset(0.015);
+  axis->Draw();*/
+  
+  /*l = new TLegend(0.5,0.5,0.8,0.8);
+  l->SetBorderSize(1);
+  l->SetMargin(0.15);
+  l->SetTextFont(102);
+  l->AddEntry(gr1,"#mu-RWELL 80 M#Omega/#Box Ar:iC_{4}H_{10} Gain #approx 4000","pl");
+  //l->AddEntry(gr2,"#mu-RWELL 1 G#Omega/#Box Ar:iC_{4}H_{10}","pl");
+  //l->AddEntry(gr3,"#mu-RWELL 1 G#Omega/#Box Ar:iC_{4}H_{10} B=0","pl");
+  l->Draw();*/
+
+}

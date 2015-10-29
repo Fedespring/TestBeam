@@ -1,0 +1,62 @@
+//#define QUOTAS 4
+#define QUOTAS 3
+
+void linfits() {
+  Double_t quota[QUOTAS];
+  Double_t residual[QUOTAS];
+  
+  //quota[0]=60;quota[1]=150.;quota[2]=533.;quota[3]=608;quota[4]=697;
+  //quota[0]=60;quota[1]=150.;quota[2]=568.;quota[3]=697;
+  quota[0]=60;quota[1]=150.;quota[2]=697.;
+  
+  //residual[0]=138;residual[1]=123;residual[2]=70;residual[3]=152; // B=0 T
+  //residual[0]=390;residual[1]=340;residual[2]=173;residual[3]=336; // B=1 T
+  residual[0]=390;residual[1]=340;residual[2]=336; // B=1 T
+
+  // Caso di tutti i piani, tutte le sigma=1
+  Double_t Sx =0;
+  for (Int_t q=0; q<QUOTAS; q++) {
+    Sx += quota[q];
+  }
+  for (Int_t q=0; q<QUOTAS; q++) {
+    quota[q] -= Sx/QUOTAS;
+  }
+  Double_t S1=0, Sxx =0;
+  for (Int_t q=0; q<QUOTAS; q++) {
+    S1 += 1.;
+    Sxx += quota[q]*quota[q];
+  }
+  
+  printf("CASO DI TUTTI I PIANI INCLUSI\n");
+  for (Int_t q=0; q<QUOTAS; q++) {
+    Double_t finc = 1.-1./S1-quota[q]*quota[q]/Sxx;
+    printf("quota %d at %6.2f finc= %6.2f\n",q,quota[q],finc);
+  }
+
+  // Caso di un piano escluso, tutte le sigma=1
+  printf("CASO DI UN PIANO ESCLUSO \n");
+  for (Int_t excl=0; excl<QUOTAS; excl++) {
+       
+    Double_t Sx =0;
+    for (Int_t q=0; q<QUOTAS; q++) {
+      if ( q != excl ) Sx += quota[q];
+    }
+    for (Int_t q=0; q<QUOTAS; q++) {
+      quota[q] -= Sx/QUOTAS;
+    }
+    Double_t S1=0, Sxx =0;
+    for (Int_t q=0; q<QUOTAS; q++) {
+      if ( q != excl ) S1 += 1.;
+      if ( q != excl ) Sxx += quota[q]*quota[q];
+    }
+    for (Int_t q=0; q<QUOTAS; q++) {
+      if (q == excl ) {
+	Double_t fexc = 1.+1./S1+quota[q]*quota[q]/Sxx;
+	printf("quota %d at %6.2f fexc= %6.2f\n",q,quota[q],fexc);
+	Double_t risoluzione= residual[q]/sqrt(fexc);
+	printf("--> Risoluzione spaziale %6.2f\n",risoluzione);
+
+      }
+    }
+  }
+}

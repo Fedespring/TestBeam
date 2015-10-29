@@ -1,0 +1,13 @@
+{
+  hadd all_1T.root ana_rec_run429.root ana_rec_run425.root ana_rec_run398.root ana_rec_run424.root ana_rec_run423.root;
+
+  hadd all_05T.root ana_rec_run431.root ana_rec_run404.root ana_rec_run399.root;
+
+  hadd all_03T.root ana_rec_run406.root ana_rec_run401.root;
+
+  hadd all_0T.root ana_rec_run428.root ana_rec_run413.root ana_rec_run419.root ana_rec_run420.root ana_rec_run422.root;
+
+  hadd all_-05T.root ana_rec_run415.root ana_rec_run414.root;
+
+  hadd all_-1T.root ana_rec_run416.root ana_rec_run417.root ana_rec_run418.root ana_rec_run430.root
+}

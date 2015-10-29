@@ -1,0 +1,109 @@
+{
+  gROOT->Reset();
+   TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.06);
+  hipStyle->SetTitleYSize(0.06);
+  //hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.04,"y");
+  hipStyle->SetTitleOffset(0.75,"y");
+
+  gROOT->SetStyle("clearRetro");
+
+
+  /*const Int_t n=14;  
+ Float_t disp[n]={1.524,0.751,0.597,0.443,0.298,0.149,0.000,-0.144,-0.296,-0.445,-0.596,-0.748,-1.205,-1.500};
+ Float_t errdisp[n]={0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010,0.010};
+ Float_t bfield[n]={1,0.5,0.4,0.3,0.2,0.1,0,-0.1,-0.2,-0.3,-0.4,-0.5,-0.8,-1};
+ Float_t errbfield[n]={0.*n};*/
+ 
+  const Int_t n=13;  
+  Float_t clusingle[n]={3.38,3.10,3.05,3.05,2.99,2.97,2.98,3.00,3.01,3.05,3.06,3.10,3.36};
+  Float_t errclusingle[n]={0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01};
+  Float_t bfield[n]={-1,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,1};
+  Float_t errbfield[n]={0.*n};
+  
+  Float_t disp[14]=0.; 
+  Float_t errdisp[14]=0.; 
+  
+  for (int i=0;i<13;i++){
+    disp[i]=((clusingle[i]*0.4/4)/0.297-1)*180/3.14;
+    errdisp[i]= ((errclusingle[i]*0.4/4)/0.3)*180/3.14;
+    cout << bfield[i] << " " << disp[i] << " " << errdisp[i] << endl;
+  }
+  
+
+
+
+  c1 = new TCanvas();
+  c1->SetGridx();
+  c1->SetGridy();
+
+  mg = new TMultiGraph();
+  TGraphErrors *gr1 = new TGraphErrors(n,bfield,disp,errbfield,errdisp);
+ 
+
+  mg->Add(gr1);
+  gr1->SetMarkerStyle(20);  
+  gr1->SetMarkerSize(1.0);
+  gr1->SetMarkerColor(1);
+  gr1->SetLineColor(1);
+  gr1->SetLineWidth(1);
+
+  
+
+  
+  mg->Draw("APL");
+
+  //X axis attributes                                                           
+  mg->GetXaxis()->SetTitle("Magnetic Field (T)");
+  mg->GetXaxis()->SetTitleFont(102);
+  mg->GetXaxis()->SetTitleSize(0.06);
+  mg->GetXaxis()->SetTitleOffset(0.75);
+  mg->GetXaxis()->SetLabelFont(102);
+  mg->GetXaxis()->SetLabelSize(0.05);
+  mg->GetXaxis()->SetLabelOffset(0);
+  mg->GetXaxis()->SetLimits(-1.2,1.2);
+
+   //Y axis attributes                                                          
+  mg->GetYaxis()->SetTitle("Lorentz Angle (Degree)");
+  mg->GetYaxis()->SetTitleFont(102);
+  mg->GetYaxis()->SetTitleSize(0.06);
+  mg->GetYaxis()->SetTitleOffset(0.85);
+  mg->GetYaxis()->SetLabelFont(102);
+  mg->GetYaxis()->SetLabelSize(0.05);
+  mg->GetYaxis()->SetLabelOffset(0.004);
+  //mg->GetYaxis()->SetRangeUser(-2.,2.);
+
+ 
+  
+  l = new TLegend(0.5,0.5,0.8,0.8);
+  l->SetBorderSize(1);
+  l->SetMargin(0.15);
+  l->SetTextFont(102);
+  l->AddEntry(gr1,"#mu-RWELL 80 M#Omega/#Box - Ar:iC_{4}H_{10}","pl");
+ 
+  
+  l->Draw();
+
+}

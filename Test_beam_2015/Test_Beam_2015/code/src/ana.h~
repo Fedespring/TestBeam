@@ -1,0 +1,278 @@
+#ifndef rec_h
+#define rec_h
+
+#include "parameters.h"
+#include "TFile.h"
+#include "TNtuple.h"
+#include "TNtupleD.h"
+#include "TH1.h"
+#include "TH2.h"
+#include <TStyle.h>
+#include "TString.h"
+#include "TGraphErrors.h"
+#include "TF1.h"
+#include "TMath.h"
+#include "TVectorT.h"
+
+
+#include <iostream>
+#include <vector>
+
+TFile *myfile;
+const int TRKA=0;
+const int TRKB=1;
+const int TRKC=5;  //Plane 5 must be set only on TRKC CAMBIATA DA 2 A 4
+const int TRKD=6;
+const int TEST=2;
+const int WELL=4;
+
+
+// B = 0T
+const float tiltX_TRKA = -5.79;
+const float tiltX_TRKB = 3.651;
+const float tiltX_TRKC = -0.25;
+const float tiltX_TRKD = 0.6309;
+
+// B = 0T
+const float tiltY_TRKA = 0.;
+const float tiltY_TRKB = 0.;
+const float tiltY_TRKC = 0.; //0
+const float tiltY_TRKD = 0.; //0
+
+// B = 1T
+/*const float tiltY_TRKA = 0.;
+const float tiltY_TRKB = 0.;
+const float tiltY_TRKC = 0.;
+const float tiltY_TRKD = 0.;*/
+
+const float tiltX_TEST = -0.4507; //-1.98  
+const float tiltY_TEST = -4.535;//-3.93
+
+
+
+
+//const float resCut = 1.5; const float tiltY_WELL = 1.302; // B=1 T run 429-425-424-423-398 V=380 V
+//const float resCut = 1.0; const float tiltY_WELL = 0.5286; // B=0.5 T run 431-404-399 V=380 V 
+//const float resCut = 1.0; const float tiltY_WELL = 0.3744; // B=0.4 T run 405-400 V=380 V  Da mettere a posto 405
+//const float resCut = 1.0; const float tiltY_WELL = 0.2213; // B=0.3 T run 406-401 V=380 V 
+//const float resCut = 1.0; const float tiltY_WELL = 0.0756; // B=0.2 T run 407-402 V=380 V  Da mettere a posto 402
+//const float resCut = 1.0; const float tiltY_WELL = -0.07345; //B=0.1 T /run 408-403  V=380 V Da mettere a posto 403
+
+//const float resCut = 0.5; const float tiltY_WELL = -3.991;// o 0 ????; // B=0 T 
+
+const float resCut = 1.5; const float tiltY_WELL = -3.625; // WELL2014
+//const float resCut = 2.5; const float tiltY_WELL = 0; // WELL 2015
+
+//const float resCut = 1.0; const float tiltY_WELL = -0.3659; //B=-0.1 T run 409-396-395 V=380 V 
+//const float resCut = 1.0; const float tiltY_WELL = -0.5176; // B=-0.2 T run 410-394-393 V=380 V 
+//const float resCut = 1.5; const float tiltY_WELL = -0.6677; // B=-0.3 T run 411-392 V=380 V 
+//const float resCut = 1.5; const float tiltY_WELL = -0.8182; //B=-0.4 T run 412-392V=380 V
+//const float resCut = 1.5; const float tiltY_WELL = -0.9697; // B=-0.5 T run 414-415-390 V=380 V 
+// const float resCut = 2.0; const float tiltY_WELL = -1.427; // B=-0.8 T run 352 V=400 V
+//const float resCut = 2.0; const float tiltY_WELL = -1.7221; // B=-1 T run 416-417-418-430-389-388 V=380 V 
+
+
+
+int  NTRKA_0, NTRKB_0, NTRKC_0, NTRKD_0, NTEST_0, NTRKA_1, NTRKB_1, NTRKC_1, NTRKD_1, NTEST_1;
+int  NGOOD; //Number of "good events" 
+int NGOODWELL;
+
+/*int  NGOODTestX;
+int  NGOODTestY;
+int NGOODTestXY;
+int nGOODmin3sX;
+int nGOODmin3sY;	
+int nGOODmin3sXY;*/
+
+//WELL PART
+int NWELL_1;
+int NGOODWELLY;
+//int nGOODWELLmin3sY;
+int NGOODWELLYClust1;
+int HitWELL;
+//
+
+/*int nGemClustermin3sX;
+int nGemClustermin3sY;
+
+int nGemClusterExtraX;
+int nGemClusterExtraY;*/
+
+//WELL PART
+int nWELLAllClusterInY;
+int nWELLAllClusterExtraY;
+int nWELLSingleClusterInY;
+int nWELLSingleClusterExtraY;
+
+double Chi2X, Chi2Y, WELLChi2Y,p1;
+
+
+float dispY_trkA, dispY_trkB, dispY_trkC,dispY_trkD,dispY_WELL;
+float dispX_trkA, dispX_trkB, dispX_trkC, dispX_trkD;
+
+float W1dispY_trkA, W1dispY_trkB, W1dispY_test, W1dispY_trkD,W1dispY_WELL;
+
+
+
+TH1I *numClust;
+
+//TRACKERS
+TH1I *cluster_size_trkA_X;
+TH1I *cluster_size_trkB_X;
+TH1I *cluster_size_trkC_X;
+TH1I *cluster_size_trkD_X;
+
+TH1I *cluster_size_trkA_Y;
+TH1I *cluster_size_trkB_Y;
+TH1I *cluster_size_trkC_Y;
+TH1I *cluster_size_trkD_Y;
+
+TH1F *HresY_trkA;
+TH1F *HresY_trkB;
+TH1F *HresY_trkC;
+TH1F *HresY_trkD;
+
+
+TH1D *trkA_resY;
+TH1D *trkB_resY;
+TH1D *trkC_resY;
+TH1D *trkD_resY;
+TH1D *trkB_Chi2;
+//_________________________________________
+
+
+
+//WELL PART
+TH1I *numClustWELLY;
+
+//WELL Eventi con piu Cluster
+TH1D *WELLTotHresY;
+TH1D *WELLTotHresAllY;
+TH1D *WELLTotQ;
+TH1D *WELLTotChi2Y;
+TH1I *All_cluster_size_WELL_In_Y;
+TH1I *All_cluster_size_WELL_Extra_Y;
+TH1I *numAllClustWELLInY;
+TH1I *numAllClustWELLExtraY;
+
+//WELL SINGOLO CLUSTER
+TH1D *WELL1HresY;
+TH1D *WELL1HresAllY;
+TH1D *WELL1Q;
+TH1D *WELL1Chi2Y;
+TH1D *TRACKER_p1;
+TH1I *Single_cluster_size_WELL_In_Y;
+TH1I *Single_cluster_size_WELL_Extra_Y;
+TH1I *numSingleClustWELLInY;
+TH1I *numSingleClustWELLExtraY;
+
+TH2F *WELL1ResY;
+
+//___________________________________________
+
+
+//BESIII Chamber
+TH1I *numClustX;
+TH1I *numClustY;
+
+TH1I *numClustmin3sX;
+TH1I *numExtraClustX;
+
+TH1I *numClustmin3sY;
+TH1I *numExtraClustY;
+
+TH1D *HresX;
+TH1D *HresY;
+
+TH1D *HresAllX;
+TH1D *HresAllY;
+TH1D *ChiresX;
+TH1D *ChiresY;
+
+TH1I *cluster_size_test_min3sY;
+TH1I *cluster_size_test_ExtraY;
+TH1I *cluster_size_test_min3sX;
+TH1I *cluster_size_test_ExtraX;
+//_____________________________________________
+
+
+
+//Histogrammi di studio
+TH2F *WELLTotResClu;
+TH1D *WY1;
+TH1D *WY2;
+TH1D *WY3;
+TH1D *WY4;
+TH1D *WY5;
+TH1D *WY6;
+TH1D *WY7;
+TH1D *WY8;
+//TH1D *WY9;
+//TH1D *WY10;
+TH1D *WY11;
+TH1D *WY12;
+TH1D *WY13;
+TH1D *WY14;
+TH1D *WY15;
+TH1D *WY16;
+TH1D *WY17;
+TH1D *WY18;
+
+TH1D *WYAfterCor;
+TH1D *WYBeforeCor;
+
+
+TH2F *WELLResClu;
+TH2F *WELLResY;
+TH2F *WELLResQ;
+TH2F *WELLYQ;
+TH2F *WELLCluQ;
+TH2F *WELLResChi2;
+
+
+TH1D *TRKAHresY;
+TH2F *TRKAResClu;
+TH2F *TRKAResY;
+TH2F *TRKAResQ;
+TH2F *TRKAYQ;
+TH2F *TRKACluQ;
+TH2F *TRKAResChi2;
+
+TH1D *WELL2HresY;
+TH1D *WELL3HresY;
+TH1D *WELL4HresY;
+TH1D *WELL5HresY;
+
+
+TH1F *WELLresY_trkA;
+TH1F *WELLresY_trkB;
+TH1F *WELLresY_test;
+TH1F *WELLresY_trkD;
+//
+
+
+
+TH1F *HresX_trkA;
+TH1F *HresX_trkB;
+TH1F *HresX_trkC;
+TH1F *HresX_trkD;
+
+TH2F *map_xAvsxB;
+TH2F *map_xAvsxC;
+TH2F *map_xAvsxD;
+
+TH2F *map_yAvsyB;
+TH2F *map_yAvsyC;
+TH2F *map_yAvsyD;
+
+TH1I *QX,*QY,*QTOT;
+
+//
+
+#endif
+
+// 0 -> -1.7
+// 1 -> 1.1
+// 2 ->
+// 5 ->
+// 6 ->

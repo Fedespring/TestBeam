@@ -1,0 +1,32 @@
+{
+  TFile *hfile = new TFile("ana_rec_run316.root");
+  
+  c1 = new TCanvas("c1","RWELL - AR/ISO=90/10",1500,900);
+  c1->Divide(3,3);
+  c1_1->cd(); 
+  WY1->Fit("gaus","R");
+  c1_2->cd();
+  WY2->Fit("gaus","R");
+  c1_3->cd();
+  WY3->Fit("gaus","R"); 
+  c1_4->cd();
+  WY4->Fit("gaus","R");
+  c1_5->cd();
+  WY5->Fit("gaus","R");
+  c1_6->cd();
+  WY6->Fit("gaus","R");
+  c1_7->cd();
+  WY7->Fit("gaus","R");
+  c1_8->cd();
+  WY8->Fit("gaus","R");
+  c1_9->cd();
+  WY9->Fit("gaus","R");
+  /*c1_10->cd();
+  WY10->Fit("gaus","R");
+  c1_11->cd();
+  WY11->Fit("gaus","R");
+  c1_12->cd();
+  WY12->Fit("gaus","R");*/
+  
+
+}

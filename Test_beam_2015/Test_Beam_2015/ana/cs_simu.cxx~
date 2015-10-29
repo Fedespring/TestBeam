@@ -1,0 +1,108 @@
+{ 
+//from rootlogon.C
+  TStyle *hipStyle= new TStyle("clearRetro","HIP plots style for publications");
+
+  // use plain black on white colors
+
+  hipStyle->SetFrameBorderMode(0);
+  hipStyle->SetCanvasBorderMode(0);
+  hipStyle->SetPadBorderMode(0);
+  hipStyle->SetPadBorderSize(0);
+  hipStyle->SetPadColor(0);
+  hipStyle->SetCanvasColor(0);
+  hipStyle->SetTitleColor(1);
+  hipStyle->SetStatColor(0);
+  hipStyle->SetFillColor(0);
+
+  hipStyle->SetTextSize(0.05);
+  // use bold lines 
+  hipStyle->SetHistLineWidth(2);
+  hipStyle->SetLineWidth(2);
+
+  hipStyle->SetPadBottomMargin(0.10);
+  hipStyle->SetTitleBorderSize(0);
+  hipStyle->SetPadLeftMargin(0.10);
+  hipStyle->SetTitleXSize(0.05);
+  hipStyle->SetTitleYSize(0.05);
+  hipStyle->SetLabelSize(0.05,"x");
+  hipStyle->SetLabelSize(0.05,"y");
+  
+  gROOT->SetStyle("clearRetro");
+  hipStyle->SetOptFit(111);
+  hipStyle->SetOptStat(0);
+  TFile *hfile = new TFile("strip_RWELL_80MOhm_0T_H4_2014_new.root");
+  //TFile *hfile = new TFile("strip_RWELL_80MOhm_0.5T_H4_2014.root");
+ 
+ c1 = new TCanvas("c1","RWELL - Pitch 100 micro AR/ISO=90/10",1500,900);
+ c1->Divide(3,2);
+ c1_1->cd(); 
+ h100->Fit("gaus","");
+ c1_2->cd();
+ h2->Fit("gaus","R");
+ c1_3->cd();
+ h4->Fit("gaus","R"); 
+ c1_4->cd();
+ h6->Fit("gaus","R");
+ c1_5->cd();
+ h8->Fit("gaus","R");
+ c1_6->cd();
+ h10->Fit("gaus","R");
+
+ /*TFile *hfile = new TFile("strip_RWELL_80MOhm_0.5T_H4_2014_new.root");
+
+ h100->SetLineColor(4);
+ h100->SetMarkerColor(4);
+ h2->SetLineColor(4);
+ h2->SetMarkerColor(4);
+ h4->SetLineColor(4);
+ h4->SetMarkerColor(4);
+ h6->SetLineColor(4);
+ h6->SetMarkerColor(4);
+ h8->SetLineColor(4);
+ h8->SetMarkerColor(4);
+ h10->SetLineColor(4);
+ h10->SetMarkerColor(4);
+ gaus->SetLineColor(4);
+ c1_1->cd(); 
+ h100->Fit("gaus","","sames");
+ c1_2->cd();
+ h2->Fit("gaus","R","sames");
+ c1_3->cd();
+ h4->Fit("gaus","R","sames"); 
+ c1_4->cd();
+ h6->Fit("gaus","R","sames");
+ c1_5->cd();
+ h8->Fit("gaus","R","sames");
+ c1_6->cd();
+ h10->Fit("gaus","R","sames");
+
+ 
+ TFile *hfile = new TFile("strip_RWELL_80MOhm_1T_H4_2014_new.root");
+
+ h100->SetLineColor(2);
+ h100->SetMarkerColor(2);
+ h2->SetLineColor(2);
+ h2->SetMarkerColor(2);
+ h4->SetLineColor(2);
+ h4->SetMarkerColor(2);
+ h6->SetLineColor(2);
+ h6->SetMarkerColor(2);
+ h8->SetLineColor(2);
+ h8->SetMarkerColor(2);
+ h10->SetLineColor(2);
+ h10->SetMarkerColor(2);
+ gaus->SetLineColor(2);
+ c1_1->cd(); 
+ h100->Fit("gaus","","sames");
+ c1_2->cd();
+ h2->Fit("gaus","R","sames");
+ c1_3->cd();
+ h4->Fit("gaus","R","sames"); 
+ c1_4->cd();
+ h6->Fit("gaus","R","sames");
+ c1_5->cd();
+ h8->Fit("gaus","R","sames");
+ c1_6->cd();
+ h10->Fit("gaus","R","sames");*/
+ 
+}
