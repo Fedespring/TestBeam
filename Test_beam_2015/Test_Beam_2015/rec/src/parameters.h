@@ -18,8 +18,12 @@ const int MaxHitPerCluster = 20;
 //const TString RecDir = "/Users/cibinett/Desktop/BeamTest/data/rec/";
 //const TString PedDir = "/Users/cibinett/Desktop/BeamTest/data/ped/";
 
-const TString RawDir = "/home/marco/Scrivania/Test_Beam_2015/run/";
-const TString RecDir = "/home/marco/Scrivania/Test_Beam_2015/well/";
+/* const TString RawDir = "/home/marco/Scrivania/Test_Beam_2015/run/"; */
+/* const TString RecDir = "/home/marco/Scrivania/Test_Beam_2015/well/"; */
+const TString RawDir = "/afs/cern.ch/work/f/federica/Test_beam_2015/Test_Beam_2015/run/";
+const TString RecDir = "/afs/cern.ch/work/f/federica/Test_beam_2015/Test_Beam_2015/well/";
+
+
 
 //const TString PedDir = "/home/marco/Scrivania/Riccardo_H4/ped/";
 
